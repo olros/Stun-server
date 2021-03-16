@@ -32,9 +32,7 @@ struct STUNIncommingHeader{
     
     unsigned short length;
     
-    unsigned int cookie;
-    
-    unsigned int identifier[3];
+    uint8_t identifier[16];
 };
 
 struct STUNMessageHeader{
@@ -45,10 +43,11 @@ struct STUNMessageHeader{
     unsigned short length;
     
 
-    unsigned int cookie;
-    
 
-    unsigned int identifier[3];
+    
+    // Unique Transaction ID
+    uint8_t identifier[16];
+
 
     uint16_t atttype;
     
@@ -63,7 +62,7 @@ struct STUNMessageHeader{
     
     uint16_t attport;
 
-    uint32_t attaddress;
+    uint8_t  attaddress[16];
 };
 
 #define IS_REQUEST(msg_type)       (((msg_type) & 0x0110) == 0x0000)
@@ -88,41 +87,71 @@ int main(){
     recvfrom(sock, message, sizeof(message), 0, reinterpret_cast<struct sockaddr*>(&from), &fromLen);
 
     char ip[16];
-    inet_ntop(AF_INET, &from.sin_addr, ip, sizeof(ip));
+    inet_ntop(AF_INET, &from.sin_addr.s_addr, ip, sizeof(ip));
     std::cout << ip << ":" << ntohs(from.sin_port) << " - " << message[5] << std::endl;
     struct STUNMessageHeader* request = (STUNMessageHeader*) malloc(sizeof(struct STUNMessageHeader));
 
 
     struct STUNIncommingHeader* inc = (STUNIncommingHeader*) message;
 
-    request->type = inc->type;
-
-    request->length = inc->length;
-
-    request->cookie = inc->cookie;
-    request->identifier[0] = inc->identifier[0];
-    request->identifier[1] = inc->identifier[1];
-    request->identifier[2] = inc->identifier[2];
-    request->atttype = htons(0x0020);
-    request->attlength = htons(0x0008);
-    request->reserved = 0x00;
-    request->protocol = 0x01;
-    request->attport = htons(0x6bae);
-    request->attaddress = htonl(0xa0e340e2);
-
-
     // request->type = htons(0x0101);
+
     // request->length = htons(0x000c);
-    // request->cookie = htonl(0x2112A442);
-    // request->identifier[0] = htonl(0x372f6e55);
-    // request->identifier[1] = htonl(0x354f644a);
-    // request->identifier[2] = htonl(0x66664c78);
+    in_addr_t n = inet_addr("2001:700:300:4000:9d2f:26ec:eaba:c700");
+
+    uint8_t* pPort;
+    uint8_t* pIP;
+
+    pPort = (uint8_t*)&(from.sin_port);
+    pIP = (uint8_t*)&(n);
+
+    // pPort[0] = pPort[0] ^ request->identifier[0];
+    // pPort[1] = pPort[1] ^ request->identifier[1];
+    
+    for (size_t i = 0; i < 16; i++)
+    {
+        pIP[i] = pIP[i] ^ request->identifier[i];
+    }
+
+    for (size_t i = 0; i < 16; i++)
+    {
+        request->identifier[i] = inc->identifier[i];
+    }
+
+    
     // request->atttype = htons(0x0020);
     // request->attlength = htons(0x0008);
-    // request->reserved = 0x00;
+    // request->reserved = 0x0;
     // request->protocol = 0x01;
-    // request->attport = htons(0x6bae);
-    // request->attaddress = htonl(0xa0e340e2);
+    // unsigned long ID = inc->identifier[0] + inc->identifier[1] + inc->identifier[2];
+    // request->attport = htons(from.sin_port);
+    // request->attaddress = htonl(pIP[0] | (pIP[1] << 8) | (pIP[2] << 16) | (pIP[3] << 24));
+    // std::printf("%d\n", sizeof(request->attaddress)/sizeof(uint8_t));
+    // std::printf("%d\n", sizeof(request->attport)/sizeof(uint8_t));
+
+
+    request->type = htons(0x0101);
+    request->length = htons(0x00018);
+    // request->cookie = htonl(0x2112A442);
+    // request->identifier[0] = htonl(0x4f6f4735);
+    // request->identifier[1] = htonl(0x45677062);
+    // request->identifier[2] = htonl(0x77737a47);
+    request->type = htons(0x0101);
+    request->atttype = htons(0x0020);
+    request->attlength = htons(0x0014);
+    request->reserved = 0x00;
+    request->protocol = 0x02;
+    request->attport = htons(0xcdaa);
+    // for (size_t i = 0; i < 16; i++)
+    // {
+    //     request->attaddress[i] = pIP[i];
+    // }
+    
+    
+    // request->attaddress[0] = htonl(0x0113a342);
+    // request->attaddress[1] = htonl(0x4c6f0735);
+    // request->attaddress[2] = htonl(0xa848568e);
+    // request->attaddress[3] = htonl(0x9dc9bd47);
     sendto(sock, request, sizeof(struct STUNMessageHeader), 0, (const struct sockaddr *) &from, sizeof(struct sockaddr_in));
   
 }
