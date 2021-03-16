@@ -6,6 +6,7 @@
 
 
 
+
 struct STUNXORMappedIPv4Address{
     unsigned char reserved;
     
@@ -61,7 +62,7 @@ struct STUNMessageHeader{
     
     uint16_t attport;
 
-    uint8_t  attaddress[16];
+    _uint128_t_  attaddress;
 };
 
 #define IS_REQUEST(msg_type)       (((msg_type) & 0x0110) == 0x0000)
@@ -107,15 +108,15 @@ int main(){
     // pPort[0] = pPort[0] ^ request->identifier[0];
     // pPort[1] = pPort[1] ^ request->identifier[1];
     
-    for (size_t i = 0; i < 16; i++)
-    {
-        pIP[i] = pIP[i] ^ request->identifier[i];
-    }
+    // for (size_t i = 0; i < 16; i++)
+    // {
+    //     pIP[i] = pIP[i] ^ request->identifier[i];
+    // }
 
-    for (size_t i = 0; i < 16; i++)
-    {
-        request->identifier[i] = inc->identifier[i];
-    }
+    // for (size_t i = 0; i < 16; i++)
+    // {
+    //     request->identifier[i] = inc->identifier[i];
+    // }
 
     
     // request->atttype = htons(0x0020);

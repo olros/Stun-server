@@ -5,6 +5,8 @@
 #include "Workers.hpp"
 #include <unistd.h>
 #include <arpa/inet.h>
+#include "stuntypes.h"
+#include "SuccessResponseBuilder.hpp"
 
 class Server {
 private:
@@ -18,6 +20,7 @@ public:
     bool startServer();
     void closeServer();
     ~Server();
+    
 };
 
 Server::Server() {}
@@ -61,7 +64,6 @@ bool Server::startServer() {
     while (keep_going) {
         n = recvfrom(socket_fd, (char *) buffer, bufferSize, MSG_WAITALL, (struct sockaddr *) &client_ipv6,
                      &length);
-
         //TODO remove logging of ipv4 and ipv6 addresses
         char ip4[16];
         inet_ntop(AF_INET, &client_ipv6.sin6_addr, ip4, sizeof(ip4));
@@ -71,12 +73,19 @@ bool Server::startServer() {
         inet_ntop(AF_INET6, &client_ipv6.sin6_addr, ip6, sizeof(ip6));
         std::cout << "v6: " << ip6 << " : " << ntohs(client_ipv6.sin6_port) << std::endl;
 
+         struct STUNIncommingHeader* inc = (STUNIncommingHeader*) buffer;
         buffer[n] = '\0';
+        unsigned char* ipv6addresss = client_ipv6.sin6_addr.s6_addr;
+        //example on how to make a request 
+        SuccessResponseBuilder builder = SuccessResponseBuilder();
+        builder.setStunSuccessHeaders(inc);
+        builder.setProtocol(false);
+        builder.XORAttributes(ipv6addresss, client_ipv6.sin6_port, false);
+        sendto(socket_fd, (const char *) builder.getResponse(), strlen(buffer), 2048, (const struct sockaddr *) &client_ipv6, sizeof(client_ipv6));
 
-        //TODO Parse ip-address and use asio
-
+        //use asio
+        
         //2048 is equal to MSG_CONFIRM which the IDE does not recognize
-        sendto(socket_fd, (const char *) buffer, strlen(buffer), 2048, (const struct sockaddr *) &client_ipv6, sizeof(client_ipv6));
         buffer = new char[bufferSize]();
     }
     close(socket_fd);
@@ -91,3 +100,8 @@ void Server::closeServer() {
 Server::~Server() {
     delete event_loop;
 }
+
+
+
+
+

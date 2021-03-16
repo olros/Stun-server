@@ -6,8 +6,8 @@
 int main() {
     std::cout << "Server starting..." << std::endl;
 
-    Server *server = new Server(3478);
-    std::cout << server->startServer() << std::endl;
+    Server server(80);
+    std::cout << server.startServer() << std::endl;
     std::cout << "Server started!" << std::endl;
 
     /*
