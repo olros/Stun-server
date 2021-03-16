@@ -25,18 +25,18 @@ struct STUNXORMappedIPv4Address{
 
 struct STUNIncommingHeader{
 
-    unsigned short type;
+    uint16_t type;
     
-    unsigned short length;
+    uint16_t length;
     
     uint8_t identifier[identifier_size];
 };
 
 struct STUNResponse{
 
-    unsigned short type;
+    uint16_t type;
 
-    unsigned short length;
+    uint16_t length;
     
     
     uint8_t identifier[identifier_size];
@@ -55,7 +55,7 @@ struct STUNResponse{
     
     uint8_t port[2];
 
-    uint8_t  ip[16];
+    uint8_t  ip[4];
 };
 
 #endif
