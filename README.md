@@ -33,5 +33,7 @@ Insert dependencies used....
 ## Resources
 * [UDP server in C](https://www.geeksforgeeks.org/udp-server-client-implementation-c/)
 * [RFC documentation for STUN](https://tools.ietf.org/html/rfc5389)
+* [Wikipedia](https://en.wikipedia.org/wiki/STUN)
+* [IBM accpet IPv4 and IPv6](https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_72/rzab6/xacceptboth.htm)
 * Add resources for xor-ing bytes...
 
