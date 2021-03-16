@@ -78,14 +78,16 @@ bool Server::startServer() {
         //example on how to make a request 
         SuccessResponseBuilder builder = SuccessResponseBuilder();
         builder.setStunSuccessHeaders(inc);
-        builder.setlength(0);
-        builder.setAttLength(0);
+        builder.setlength(true);
+        builder.setAttLength(true);
         builder.setAttType(0);
         builder.setPadding(0);
         builder.setProtocol(true);
         // unsigned char* n = (unsigned char*)client.sin_addr.s_addr;
         sockaddr_in to = client;
+        std::cout << builder.getlength() << std::endl;
         builder.XORAttributes(client.sin_addr.s_addr, client.sin_port, true);
+        std::cout << builder.getlength() << std::endl;
         sendto(socket_fd, builder.getResponse(), sizeof(struct STUNResponse), 2048, (const struct sockaddr *) &to, sizeof(to));
         std::cout<<"ssdds"<<std::endl;
         //use asio

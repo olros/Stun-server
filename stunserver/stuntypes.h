@@ -7,6 +7,7 @@
 #define identifier_size 16
 #define IPv4_PROTOCOL_VALUE 0x01
 #define IPv6_PROTOCOL_VALUE 0x02
+#define XOR_MAPPED_ADdRESSS 0x0020
 #define IS_REQUEST(msg_type)       (((msg_type) & 0x0110) == 0x0000)
 #define IS_INDICATION(msg_type)    (((msg_type) & 0x0110) == 0x0010)
 #define IS_SUCCESS_RESP(msg_type)  (((msg_type) & 0x0110) == 0x0100)

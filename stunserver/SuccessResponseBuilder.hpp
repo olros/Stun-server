@@ -17,12 +17,13 @@ class SuccessResponseBuilder{
         void setPort(uint8_t *port);
         void setIP(uint8_t *ip, bool isIPv4);
     public:
+        long getlength();
         SuccessResponseBuilder();
         struct STUNResponse* getResponse();
         void setStunSuccessHeaders(struct STUNIncommingHeader* inc);
-        void setlength(int length);
+        void setlength(bool isIPv4);
         void setAttType(int type);
-        void setAttLength(int length);
+        void setAttLength(bool isIPv4);
         void setProtocol( bool isIPv4);
         void setPadding( int size);
         void setIP(uint8_t *ip);
@@ -44,24 +45,27 @@ void SuccessResponseBuilder::setStunSuccessHeaders(struct STUNIncommingHeader* i
     }
 }
 
-void SuccessResponseBuilder::setlength(int length){
-    res->length = htons(0x00c);
+void SuccessResponseBuilder::setlength(bool isIPv4){
+    res->length = htons(isIPv4? 12: 24);
+
 }
 
 void SuccessResponseBuilder::setAttType(int type){
-    res->atttype= htons(0x0020);//htons(type)
+    res->atttype= htons(XOR_MAPPED_ADdRESSS);//htons(type)
 }
-void SuccessResponseBuilder::setAttLength(int length){
-    res->attlength = htons(0x0008);
+void SuccessResponseBuilder::setAttLength(bool isIPv4){
+    res->attlength = htons(isIPv4 ? 8 : 20);
+
 }
 
 
 void SuccessResponseBuilder::setProtocol(bool isIPv4){
-    res->protocol = 0x01;//isIPv4 ? IPv4_PROTOCOL_VALUE : IPv6_PROTOCOL_VALUE; 
+    res->protocol = isIPv4 ? IPv4_PROTOCOL_VALUE : IPv6_PROTOCOL_VALUE; 
+
 }
 
 void SuccessResponseBuilder::setPadding(int size){
-    res->padding = size == 0 ? 0x00 : 32-size;
+    res->padding = ((size_t )res & 1) ? 0x01 : 0x00;
 }
 
 void SuccessResponseBuilder::XORAttributes(in_addr_t &ip ,in_port_t &port, bool isIPv4){
@@ -94,6 +98,10 @@ void SuccessResponseBuilder::setIP(uint8_t *ip, bool isIPv4){
     }
 }
 
+long SuccessResponseBuilder::getlength(){
+auto length = sizeof(res);
+return length;
+}
 #endif
 
 
