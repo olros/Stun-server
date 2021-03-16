@@ -1,0 +1,8 @@
+udp:
+  container_name: my-udp-listener
+  environment:
+    - UDPPORT=80
+  build: ./Server
+  ports:
+  - "8080:80"
+  - "8080:80/udp"
