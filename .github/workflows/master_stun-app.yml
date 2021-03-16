@@ -26,8 +26,8 @@ jobs:
         password: ${{ secrets.AzureAppService_ContainerPassword_b1d84d4e45bc4ce6a2fd6e958607da93 }}
 
     - run: |
-        docker build . -t stunregistry.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_5e3f107dfaa74e07ab0be8bd4c6aedca }}/stun:${{ github.sha }}
-        docker push stunregistry.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_5e3f107dfaa74e07ab0be8bd4c6aedca }}/stun:${{ github.sha }}
+        docker build . -t stunregistry.azurecr.io/stun:${{ github.sha }}
+        docker push stunregistry.azurecr.io/stun:${{ github.sha }}
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
@@ -35,4 +35,4 @@ jobs:
         app-name: 'stun-app'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_ca12ada344d7483289f8321e4fa94bde }}
-        images: 'stunregistry.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_5e3f107dfaa74e07ab0be8bd4c6aedca }}/stun:${{ github.sha }}'
+        images: 'stunregistry.azurecr.io/stun:${{ github.sha }}'
