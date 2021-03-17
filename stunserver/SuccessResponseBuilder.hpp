@@ -10,7 +10,7 @@
 // but this depends on how we want to use SuccessResponseBuilder in the server class
 
 
-#define SuccessCode 0x0001
+#define SuccessCode 0x0101
 class SuccessResponseBuilder{
     private:
         struct STUNResponse* res;
