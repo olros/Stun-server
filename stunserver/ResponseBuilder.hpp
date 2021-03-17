@@ -1,6 +1,7 @@
 #ifndef ResponseBuilder_hpp
 #define ResponseBuilder_hpp
 #include "SuccessResponseBuilder.hpp"
+#include "ErrorResponseBuilder.hpp"
 
 
 class ResponseBuilder{
@@ -12,6 +13,7 @@ class ResponseBuilder{
         ResponseBuilder();
         ResponseBuilder(bool isIPV4, STUNIncommingHeader* inc, sockaddr_in client);
         SuccessResponseBuilder buildSuccessResponse();
+        ErrorResponseBuilder buildErrorResponse();
 
 };
 
@@ -33,6 +35,15 @@ SuccessResponseBuilder ResponseBuilder::buildSuccessResponse(){
     .setProtocol(isIPV4)
     .XORAttributes(client.sin_addr.s_addr, client.sin_port, isIPV4)
     .setPadding(0);
+    
+}
+
+ErrorResponseBuilder ResponseBuilder::buildErrorResponse(){
+    ErrorResponseBuilder builder = ErrorResponseBuilder();
+    return builder.setStunErrorHeaders(inc)
+    .setlength()
+    .setAttLength()
+    .setAttType();
     
 }
 

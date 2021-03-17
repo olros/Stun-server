@@ -56,7 +56,7 @@ bool Server::startServer() {
     server.sin_family = AF_INET;
 
 
-    if (bind(socket_fd, reinterpret_cast<struct sockaddr *>(&server), sizeof(server)) < 0) {
+    if(bind(socket_fd, (struct sockaddr*)(&server), sizeof(server)) < 0){
         close(socket_fd);
         return false;
     }
@@ -67,13 +67,8 @@ bool Server::startServer() {
         struct sockaddr_in client;
         socklen_t length = sizeof(client);
         unsigned char buffer[bufferSize];
-
-
-        //Passing variables tot the event_loop is not a problem since we always can pass it's address instead ensurig that the change can be viewed elsewhere
-
-
-        //Dont need to lock the receiving part of the socket since it is full duplex, and only one thread is reading
-        int n = recvfrom(socket_fd, buffer, bufferSize, MSG_WAITALL, (struct sockaddr *) &client, &length);
+        n = recvfrom(socket_fd, buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr*)(&client),
+                     &length);
         ResponseBuilder builder;
         bool isError = false;
         std::cout << buffer << std::endl;
@@ -116,6 +111,12 @@ bool Server::startServer() {
         // char ip6[16];
         // inet_ntop(AF_INET6, &client_ipv6.sin6_addr, ip6, sizeof(ip6));
         // std::cout << "v6: " << ip6 << " : " << ntohs(client_ipv6.sin6_port) << std::endl;
+
+        ResponseBuilder builder = ResponseBuilder(true, (STUNIncommingHeader*)buffer, client);
+ 
+    
+        sendto(socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4), 
+        MSG_CONFIRM, (const struct sockaddr *) &client, sizeof(client));
     }
     close(socket_fd);
     return true;

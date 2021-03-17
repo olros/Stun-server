@@ -1,7 +1,6 @@
 #ifndef SuccessResponseBuilder_hpp
 #define SuccessResponseBuilder_hpp
 
-#include <iostream>
 #include "stuntypes.h"
 #include <arpa/inet.h>
 

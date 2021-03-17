@@ -85,4 +85,20 @@ struct STUNResponseIPV4{
     uint8_t  ip[4];
 };
 
+
+struct StunErrorResponse{
+    uint16_t type;
+
+    uint16_t length;
+    
+    
+    uint8_t identifier[identifier_size];
+
+
+    uint16_t atttype;
+    
+
+    uint16_t attlength;
+};
+
 #endif
