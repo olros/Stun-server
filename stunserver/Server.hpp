@@ -59,13 +59,12 @@ bool Server::startServer() {
         return false;
     }
 
-    int n;
-    socklen_t length = sizeof(client);
-
     while (keep_going) {
-        //Have to create a new  client ipv6 address for each run of the loop
+        //Have to create a new client ipv6 address for each run of the loop
+        int n;
         struct sockaddr_in6 client_ipv6;
         struct sockaddr_in client;
+        socklen_t length = sizeof(client);
 
 
         //TODO ASIO should be implemented so that we can keep on receiving new udp packets, while handling data of other packets and sending the data back
@@ -74,39 +73,8 @@ bool Server::startServer() {
         //TODO add a mutex to the socket so that only one thread at a time can use it
         //TODO passing variables tot the event_loop is not a problem since we always can pass it's address instead ensurig that the change can be viewed elsewhere
 
-        //TODO alternative 1
-        //Handling the data will block
-        //Putting the receive method in the event loop will make it so this method continuously adds more receive since it's running in a while loop
-        event_loop->post_after([]{
-            //TODO add code for handling data and sending it
-        }, []{
-           //TODO Add code for receiving data
-        });
-
-
-
-        //TODO alternative 2
-        //Putting the receive method in the event loop will make it so this method continuously adds more receive since it's running in a while loop
-        event_loop->post_after([]{
-            //TODO send answer
-        }, event_loop->post_after([]{
-            //TODO handle data
-        }, []{
-            //TODO receive data
-        }));
-
-
-        //TODO alternative 3
-        //TODO Receive data then post it
-        //Will only add to the event_loop when necessery and will therefore not add infite recieve methods
-        //Is this correct use of the event_loop?? More of a mix between multithreaded and event_loop based
-        event_loop->post_after([]{
-            //TODO sending data back
-        },[]{
-            //TODO handle data
-        });
-
-
+        //TODO check if locking the socket is necessary
+        //Change since we cannot send if we have not read
         //Adding scope to make lock automatically release
         {
             std::unique_lock<std::mutex>(socket_lock);
@@ -114,13 +82,15 @@ bool Server::startServer() {
                          &length);
         }
 
+        ResponseBuilder builder;
         //TODO use responsebuilder
-        event_loop->post_after([&socket_lock, &server_ip6, &client_ipv6, &socket_fd, &buffer]{
+        event_loop->post_after([&socket_lock, &server_ip6, &client_ipv6, &socket_fd, &buffer, &builder]{
             std::unique_lock<std::mutex>(socket_lock);
             //2048 is equal to MSG_CONFIRM which the IDE does not recognize
-            sendto(socket_fd, (const char *) buffer, strlen(buffer), 2048, ())
-        }, []{
-            //TODO add functionallity to handle data
+            sendto(socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4),
+                   2048, (const struct sockaddr *) &client, sizeof(client));
+        }, [&builder, &buffer, &client]{
+           builder = ResponseBuilder(true, (STUNIncommingHeader*)buffer, client);
         })
 
         //TODO remove logging of ipv4 and ipv6 addresses
@@ -132,7 +102,7 @@ bool Server::startServer() {
         // inet_ntop(AF_INET6, &client_ipv6.sin6_addr, ip6, sizeof(ip6));
         // std::cout << "v6: " << ip6 << " : " << ntohs(client_ipv6.sin6_port) << std::endl;
 
-        ResponseBuilder builder = ResponseBuilder(true, (STUNIncommingHeader*)buffer, client);
+
  
     
         sendto(socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4), 
