@@ -61,13 +61,14 @@ bool Server::startServer() {
     socklen_t length = sizeof(client);
 
     while (keep_going) {
+        std::cout<<"We are inn boyzz!!!!!"<<std::endl;
         unsigned char buffer[bufferSize];
         n = recvfrom(socket_fd, buffer, sizeof(buffer), MSG_WAITALL, reinterpret_cast<struct sockaddr*>(&client),
                      &length);
         //TODO remove logging of ipv4 and ipv6 addresses
-        // char ip4[16];
-        // inet_ntop(AF_INET, &client.sin_addr, ip4, sizeof(ip4));
-        // std::cout << "v4: " << ip4 << " : " << ntohs(client.sin_addr.s_addr) << std::endl;
+        char ip4[16];
+        inet_ntop(AF_INET, &client.sin_addr, ip4, sizeof(ip4));
+        std::cout << "v4: " << ip4 << " : " << ntohs(client.sin_addr.s_addr) << std::endl;
 
         // char ip6[16];
         // inet_ntop(AF_INET6, &client_ipv6.sin6_addr, ip6, sizeof(ip6));
