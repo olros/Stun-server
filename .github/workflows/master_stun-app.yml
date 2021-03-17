@@ -29,10 +29,22 @@ jobs:
         docker build . -t stunregistry.azurecr.io/stun:${{ github.sha }}
         docker push stunregistry.azurecr.io/stun:${{ github.sha }}
 
-    - name: Deploy to Azure Web App
-      uses: azure/webapps-deploy@v2
+    # - name: Deploy to Azure Web App
+    #   uses: azure/webapps-deploy@v2
+    #   with:
+    #     app-name: 'stun-app'
+    #     slot-name: 'production'
+    #     publish-profile: ${{ secrets.AzureAppService_PublishProfile_ca12ada344d7483289f8321e4fa94bde }}
+    #     images: 'stunregistry.azurecr.io/stun:${{ github.sha }}'
+
+    - name: 'Deploy to Azure Container Instances'
+      uses: 'azure/aci-deploy@v1'
       with:
-        app-name: 'stun-app'
-        slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_ca12ada344d7483289f8321e4fa94bde }}
-        images: 'stunregistry.azurecr.io/stun:${{ github.sha }}'
+        resource-group: Nettprog_project
+        dns-name-label: Nettprog_project${{ github.run_number }}
+        image: https://stunregistry.azurecr.io//sampleapp:${{ github.sha }}
+        registry-login-server: https://stunregistry.azurecr.io/
+        registry-username: ${{ secrets.AzureAppService_ContainerUsername_5e3f107dfaa74e07ab0be8bd4c6aedca }}
+        registry-password: ${{ secrets.AzureAppService_ContainerPassword_b1d84d4e45bc4ce6a2fd6e958607da93 }}
+        name: testudp
+        location: 'north europe'
