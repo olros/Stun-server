@@ -1,0 +1,18 @@
+on:
+  push:
+    branches:
+      - feat/CI
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.VM_IP }}
+        username: ${{ secrets.VM_USERNAME }}
+        password: ${{ secrets.VM_PASSWORD }}
+        script: sudo ufw allow 8080 && docker login --username ${{ secrets.REGISTRY_USERNAME }} --password ${{ secrets.REGISTRY_PASSWORD }} && docker pull ${{ secrets.REGISTRY_LOGIN_SERVER }}/stun:${{ github.sha }} && docker run ${{ secrets.REGISTRY_LOGIN_SERVER }}/stun:${{ github.sha }} 
