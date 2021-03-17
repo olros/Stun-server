@@ -34,7 +34,7 @@ jobs:
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/stun:${{ github.sha }}
 
     - name: 'Deploy to Azure Container Instances'
-      uses: 'azure/aci-deploy@v1'
+      uses: 'olros/aci-deploy@v1'
       with:
         resource-group: ${{ secrets.RESOURCE_GROUP }}
         dns-name-label: ${{ secrets.RESOURCE_GROUP }}${{ github.run_number }}
@@ -44,5 +44,5 @@ jobs:
         registry-password: ${{ secrets.REGISTRY_PASSWORD }}
         name: stuncontainer
         location: 'north europe'
-        protocol: "UDP"
+        protocol: UDP
         ports: 80
