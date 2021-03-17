@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include "stuntypes.h"
-#include "SuccessResponseBuilder.hpp"
+#include "ResponseBuilder.hpp"
 
 class Server {
 private:
@@ -61,7 +61,7 @@ bool Server::startServer() {
     socklen_t length = sizeof(client);
 
     while (keep_going) {
-        unsigned char buffer[256];
+        unsigned char buffer[bufferSize];
         n = recvfrom(socket_fd, buffer, sizeof(buffer), MSG_WAITALL, reinterpret_cast<struct sockaddr*>(&client),
                      &length);
         //TODO remove logging of ipv4 and ipv6 addresses
@@ -73,26 +73,11 @@ bool Server::startServer() {
         // inet_ntop(AF_INET6, &client_ipv6.sin6_addr, ip6, sizeof(ip6));
         // std::cout << "v6: " << ip6 << " : " << ntohs(client_ipv6.sin6_port) << std::endl;
 
-         struct STUNIncommingHeader* inc = (STUNIncommingHeader*) buffer;
-        // unsigned char* ipv6addresss = client.sin_addr.s_addr;
-        //example on how to make a request 
-        SuccessResponseBuilder builder = SuccessResponseBuilder();
-        builder.setStunSuccessHeaders(inc);
-        builder.setlength(true);
-        builder.setAttLength(true);
-        builder.setAttType(0);
-        builder.setPadding(0);
-        builder.setProtocol(true);
-        // unsigned char* n = (unsigned char*)client.sin_addr.s_addr;
-        sockaddr_in to = client;
-        std::cout << builder.getlength() << std::endl;
-        builder.XORAttributes(client.sin_addr.s_addr, client.sin_port, true);
-        std::cout << builder.getlength() << std::endl;
-        sendto(socket_fd, builder.getResponse(), sizeof(struct STUNResponse), 2048, (const struct sockaddr *) &to, sizeof(to));
-        std::cout<<"ssdds"<<std::endl;
-        //use asio
-        
-        //2048 is equal to MSG_CONFIRM which the IDE does not recognize
+        ResponseBuilder builder = ResponseBuilder(true, (STUNIncommingHeader*)buffer, client);
+ 
+    
+        sendto(socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4), 
+            MSG_CONFIRM, (const struct sockaddr *) &client, sizeof(client));
     }
     close(socket_fd);
     return true;
@@ -106,6 +91,9 @@ void Server::closeServer() {
 Server::~Server() {
     delete event_loop;
 }
+
+
+
 
 
 

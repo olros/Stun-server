@@ -56,6 +56,32 @@ struct STUNResponse{
     
     uint8_t port[2];
 
+    uint8_t  ip[16];
+};
+
+struct STUNResponseIPV4{
+
+    uint16_t type;
+
+    uint16_t length;
+    
+    
+    uint8_t identifier[identifier_size];
+
+
+    uint16_t atttype;
+    
+
+    uint16_t attlength;
+
+    uint8_t padding;
+
+    uint8_t protocol;
+
+
+    
+    uint8_t port[2];
+
     uint8_t  ip[4];
 };
 

@@ -1,5 +1,5 @@
-#ifndef ResponseBuilder_hpp
-#define ResponseBuilder_hpp
+#ifndef SuccessResponseBuilder_hpp
+#define SuccessResponseBuilder_hpp
 
 #include <iostream>
 #include "stuntypes.h"
@@ -20,14 +20,13 @@ class SuccessResponseBuilder{
         long getlength();
         SuccessResponseBuilder();
         struct STUNResponse* getResponse();
-        void setStunSuccessHeaders(struct STUNIncommingHeader* inc);
-        void setlength(bool isIPv4);
-        void setAttType(int type);
-        void setAttLength(bool isIPv4);
-        void setProtocol( bool isIPv4);
-        void setPadding( int size);
-        void setIP(uint8_t *ip);
-        void XORAttributes(in_addr_t &ip,in_port_t &port, bool isIPv4);
+        SuccessResponseBuilder&  setStunSuccessHeaders(struct STUNIncommingHeader* inc);
+        SuccessResponseBuilder&  setlength(bool isIPv4);
+        SuccessResponseBuilder&  setAttType(int type);
+        SuccessResponseBuilder&  setAttLength(bool isIPv4);
+        SuccessResponseBuilder&  setProtocol( bool isIPv4);
+        SuccessResponseBuilder&  setPadding( int size);
+        SuccessResponseBuilder& XORAttributes(in_addr_t &ip,in_port_t &port, bool isIPv4);
 };
 
 SuccessResponseBuilder::SuccessResponseBuilder(){
@@ -38,37 +37,43 @@ struct STUNResponse* SuccessResponseBuilder::getResponse(){
     return res;
 }
 
-void SuccessResponseBuilder::setStunSuccessHeaders(struct STUNIncommingHeader* inc){
+SuccessResponseBuilder&  SuccessResponseBuilder::setStunSuccessHeaders(struct STUNIncommingHeader* inc){
     res->type = htons(SuccessCode);
     for(int i = 0; i < identifier_size; i++){
         res->identifier[i] = inc->identifier[i];
     }
+    return *this;
 }
 
-void SuccessResponseBuilder::setlength(bool isIPv4){
+SuccessResponseBuilder&  SuccessResponseBuilder::setlength(bool isIPv4){
     res->length = htons(isIPv4? 12: 24);
+    return *this;
 
 }
 
-void SuccessResponseBuilder::setAttType(int type){
-    res->atttype= htons(XOR_MAPPED_ADdRESSS);//htons(type)
+SuccessResponseBuilder&  SuccessResponseBuilder::setAttType(int type){
+    res->atttype= htons(XOR_MAPPED_ADdRESSS);
+    return *this;
 }
-void SuccessResponseBuilder::setAttLength(bool isIPv4){
+SuccessResponseBuilder&  SuccessResponseBuilder::setAttLength(bool isIPv4){
     res->attlength = htons(isIPv4 ? 8 : 20);
+    return *this;
 
 }
 
 
-void SuccessResponseBuilder::setProtocol(bool isIPv4){
+SuccessResponseBuilder&  SuccessResponseBuilder::setProtocol(bool isIPv4){
     res->protocol = isIPv4 ? IPv4_PROTOCOL_VALUE : IPv6_PROTOCOL_VALUE; 
+    return *this;
 
 }
 
-void SuccessResponseBuilder::setPadding(int size){
+SuccessResponseBuilder&  SuccessResponseBuilder::setPadding(int size){
     res->padding = ((size_t )res & 1) ? 0x01 : 0x00;
+    return *this;
 }
 
-void SuccessResponseBuilder::XORAttributes(in_addr_t &ip ,in_port_t &port, bool isIPv4){
+SuccessResponseBuilder& SuccessResponseBuilder::XORAttributes(in_addr_t &ip ,in_port_t &port, bool isIPv4){
     uint8_t* pPort = (uint8_t*)&(port);
     uint8_t* pIP = (uint8_t*)&(ip);
 
@@ -82,13 +87,13 @@ void SuccessResponseBuilder::XORAttributes(in_addr_t &ip ,in_port_t &port, bool 
     setPort(pPort);
     setIP(pIP, isIPv4);
 
+    return *this;
 }
 
 void SuccessResponseBuilder::setPort(uint8_t *port){
     for (size_t i = 0; i < 2; i++){
         res->port[i] = port[i];
     }
-        // res->port = ntohs(0x6bae);
     
 }
 
@@ -99,8 +104,8 @@ void SuccessResponseBuilder::setIP(uint8_t *ip, bool isIPv4){
 }
 
 long SuccessResponseBuilder::getlength(){
-auto length = sizeof(res);
-return length;
+    auto length = sizeof(res);
+    return length;
 }
 #endif
 
