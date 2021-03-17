@@ -5,7 +5,6 @@
 #include "Workers.hpp"
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <mutex>
 #include "stuntypes.h"
 #include "ResponseBuilder.hpp"
 
