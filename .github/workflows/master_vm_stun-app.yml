@@ -15,4 +15,4 @@ jobs:
         host: ${{ secrets.VM_IP }}
         username: ${{ secrets.VM_USERNAME }}
         password: ${{ secrets.VM_PASSWORD }}
-        script: sudo ufw allow 8080 && sudo docker login --username ${{ secrets.REGISTRY_USERNAME }} --password ${{ secrets.REGISTRY_PASSWORD }} && sudo docker pull ${{ secrets.REGISTRY_LOGIN_SERVER }}/stun:${{ github.sha }} && sudo docker run ${{ secrets.REGISTRY_LOGIN_SERVER }}/stun:${{ github.sha }} 
+        script: sudo ufw allow 8080  && cd IDATT2104-Project/ && git pull && ls && nohup sudo make deploy & exit
