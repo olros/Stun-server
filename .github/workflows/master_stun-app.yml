@@ -44,5 +44,5 @@ jobs:
         registry-password: ${{ secrets.REGISTRY_PASSWORD }}
         name: stuncontainer
         location: 'north europe'
+        protocol: "UDP"
         ports: 80
-        protocol: 'UDP'
