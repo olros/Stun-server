@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <mutex>
+#include "stuntypes.h"
+#include "ResponseBuilder.hpp"
 
 class Server {
 private:
@@ -33,36 +35,37 @@ bool Server::startServer() {
     //May need to add variables to the post method in event_loop in c++
     event_loop->start();
     keep_going = true;
-    struct sockaddr_in server, client;
+    struct sockaddr_in server;
     struct sockaddr_in6 server_ip6;
-    const int bufferSize =1024;
-    char* buffer = new char[bufferSize]();
-    int socket_fd = socket(AF_INET6, SOCK_DGRAM, 0);
+    const int bufferSize =256;
+    unsigned char buffer[bufferSize];
+    int socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if(socket_fd == -1) return false;
 
     std::mutex socket_lock;
 
     //Ipv6
-    server_ip6.sin6_family=AF_INET6;
-    server_ip6.sin6_port=htons(this->port);
-    server_ip6.sin6_addr=in6addr_any;
-    /*//Ipv4
+    // server_ip6.sin6_family=AF_INET6;
+    // server_ip6.sin6_port=htons(this->port);
+    // server_ip6.sin6_addr=in6addr_any;
+    //Ipv4
     server.sin_port = htons(this->port);
     server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_family = AF_INET;*/
+    server.sin_family = AF_INET;
 
 
-    if(bind(socket_fd, (const struct sockaddr *)&server_ip6, sizeof(server_ip6)) < 0){
+    if(bind(socket_fd, reinterpret_cast<struct sockaddr*>(&server), sizeof(server)) < 0){
         close(socket_fd);
         return false;
     }
 
     int n;
-    socklen_t length = sizeof(client_ipv6);
+    socklen_t length = sizeof(client);
 
     while (keep_going) {
         //Have to create a new  client ipv6 address for each run of the loop
         struct sockaddr_in6 client_ipv6;
+        struct sockaddr_in client;
 
 
         //TODO ASIO should be implemented so that we can keep on receiving new udp packets, while handling data of other packets and sending the data back
@@ -107,7 +110,7 @@ bool Server::startServer() {
         //Adding scope to make lock automatically release
         {
             std::unique_lock<std::mutex>(socket_lock);
-            n = recvfrom(socket_fd, (char *) buffer, bufferSize, MSG_WAITALL, (struct sockaddr *) &client_ipv6,
+            n = recvfrom(socket_fd, buffer, bufferSize, MSG_WAITALL, (struct sockaddr *) &client,
                          &length);
         }
 
@@ -122,20 +125,18 @@ bool Server::startServer() {
 
         //TODO remove logging of ipv4 and ipv6 addresses
         char ip4[16];
-        inet_ntop(AF_INET, &client_ipv6.sin6_addr, ip4, sizeof(ip4));
-        std::cout << "v4: " << ip4 << " : " << ntohs(client_ipv6.sin6_port) << std::endl;
+        inet_ntop(AF_INET, &client.sin_addr, ip4, sizeof(ip4));
+        std::cout << "v4: " << ip4 << " : " << ntohs(client.sin_addr.s_addr) << std::endl;
 
-        char ip6[16];
-        inet_ntop(AF_INET6, &client_ipv6.sin6_addr, ip6, sizeof(ip6));
-        std::cout << "v6: " << ip6 << " : " << ntohs(client_ipv6.sin6_port) << std::endl;
+        // char ip6[16];
+        // inet_ntop(AF_INET6, &client_ipv6.sin6_addr, ip6, sizeof(ip6));
+        // std::cout << "v6: " << ip6 << " : " << ntohs(client_ipv6.sin6_port) << std::endl;
 
-        buffer[n] = '\0';
-
-        //TODO Parse ip-address and use asio
-
-        //2048 is equal to MSG_CONFIRM which the IDE does not recognize
-        sendto(socket_fd, (const char *) buffer, strlen(buffer), 2048, (const struct sockaddr *) &client_ipv6, sizeof(client_ipv6));
-        buffer = new char[bufferSize]();
+        ResponseBuilder builder = ResponseBuilder(true, (STUNIncommingHeader*)buffer, client);
+ 
+    
+        sendto(socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4), 
+            MSG_CONFIRM, (const struct sockaddr *) &client, sizeof(client));
     }
     close(socket_fd);
     return true;
@@ -150,3 +151,11 @@ void Server::closeServer() {
 Server::~Server() {
     delete event_loop;
 }
+
+
+
+
+
+
+
+

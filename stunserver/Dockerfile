@@ -1,9 +1,7 @@
 FROM gcc:9.3.0
-RUN mkdir /stunserver
-WORKDIR /stunserver
-COPY server.cpp /stunserver/
+COPY . .
 ENV UDPPORT 80
-RUN g++ -o server server.cpp
-CMD ["./server"]
+RUN g++ -o main main.cpp -pthread
+CMD ["./main"]
 EXPOSE ${UDPPORT}
 EXPOSE ${UDPPORT}/udp
