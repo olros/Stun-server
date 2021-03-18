@@ -9,10 +9,13 @@ class ResponseBuilder{
         STUNIncommingHeader* inc;
         sockaddr_in client;
     public:
+        ResponseBuilder();
         ResponseBuilder(bool isIPV4, STUNIncommingHeader* inc, sockaddr_in client);
         SuccessResponseBuilder buildSuccessResponse();
 
 };
+
+ResponseBuilder::ResponseBuilder() {}
 
 ResponseBuilder::ResponseBuilder(bool isIPV4, STUNIncommingHeader* inc, sockaddr_in client){
     this->client = client;
