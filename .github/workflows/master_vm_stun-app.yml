@@ -30,4 +30,4 @@ jobs:
         host: ${{ secrets.VM_IP }}
         user: ${{ secrets.VM_USERNAME }}
         key: ${{ secrets.VM_PASSWORD }}
-        args:"-tt -vvv"
+        args: "-tt -vvv"
