@@ -7,6 +7,7 @@
 
 #define ErrorCode 0x0111
 #define ErrorCodeType 0x0009
+
 class ErrorResponseBuilder{
     private:
         struct StunErrorResponse* res;
