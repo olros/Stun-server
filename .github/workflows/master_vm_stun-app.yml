@@ -26,6 +26,7 @@ jobs:
           sudo ufw allow 8080
           cd IDATT2104-Project
           git pull origin
+          sudo make deploy < /dev/null > /tmp/mylogfile 2>&1 &
           echo "deployed"
         host: ${{ secrets.VM_IP }}
         user: ${{ secrets.VM_USERNAME }}
