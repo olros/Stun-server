@@ -80,8 +80,8 @@ bool Server::startServer() {
         // std::cout << "v6: " << ip6 << " : " << ntohs(client_ipv6.sin6_port) << std::endl;
 
         //TODO remove logging of error detection
-        std::cout << "((buffer[0] >> 6) & 3) == 0: " << (((buffer[0] >> 6) & 3) == 0) << std::endl;
-        if (((buffer[0] >> 6) & 3) == 0) {
+        std::cout << "((buffer[0] >> 6) & 3) == 0 && buffer[0] != 0: " << (((buffer[0] >> 6) & 3) == 0 && buffer[0] != 0) << std::endl;
+        if (((buffer[0] >> 6) & 3) == 0 && buffer[0] != 0) {
             ResponseBuilder builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
             sendto(socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4),
                    2048, (const struct sockaddr *) &client, sizeof(client));
