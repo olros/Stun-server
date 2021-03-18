@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy container app to Azure Web App - stun-app
 
 on:
@@ -17,22 +14,34 @@ jobs:
         working-directory: ./stunserver
 
     steps:
-    - uses: actions/checkout@master
-
-    - uses: azure/docker-login@v1
+    # checkout the repo
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@main
+      
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
       with:
-        login-server: https://stunregistry.azurecr.io/
-        username: ${{ secrets.AzureAppService_ContainerUsername_5e3f107dfaa74e07ab0be8bd4c6aedca }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_b1d84d4e45bc4ce6a2fd6e958607da93 }}
-
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: 'Build and push image'
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
     - run: |
-        docker build . -t stunregistry.azurecr.io/stun:${{ github.sha }}
-        docker push stunregistry.azurecr.io/stun:${{ github.sha }}
+        docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/stun:${{ github.sha }}
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/stun:${{ github.sha }}
 
-    - name: Deploy to Azure Web App
-      uses: azure/webapps-deploy@v2
+    - name: 'Deploy to Azure Container Instances'
+      uses: 'olros/aci-deploy@v4'
       with:
-        app-name: 'stun-app'
-        slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_ca12ada344d7483289f8321e4fa94bde }}
-        images: 'stunregistry.azurecr.io/stun:${{ github.sha }}'
+        resource-group: ${{ secrets.RESOURCE_GROUP }}
+        dns-name-label: ${{ secrets.RESOURCE_GROUP }}${{ github.run_number }}
+        image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/stun:${{ github.sha }}
+        registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        registry-username: ${{ secrets.REGISTRY_USERNAME }}
+        registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+        name: stuncontainer
+        location: 'north europe'
+        ports: 80

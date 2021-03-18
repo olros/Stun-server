@@ -90,7 +90,10 @@ bool Server::startServer() {
         //TODO remove logging of ipv4 and ipv6 addresses
         char ip4[16];
         inet_ntop(AF_INET, &client.sin_addr, ip4, sizeof(ip4));
+
         std::cout << "v4: " << ip4 << " : " << htons(client.sin_addr.s_addr) << " : " << ntohs(client.sin_port) << std::endl;
+        std::cout << "We did it"  << std::endl;
+
 
         // char ip6[16];
         // inet_ntop(AF_INET6, &client_ipv6.sin6_addr, ip6, sizeof(ip6));
