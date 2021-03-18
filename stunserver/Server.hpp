@@ -39,6 +39,7 @@ bool Server::startServer() {
     //May need to add variables to the post method in event_loop in c++
     event_loop->start();
     keep_going = true;
+
     struct sockaddr_in server;
     struct sockaddr_in6 server_ip6;
     const int bufferSize = 256;
@@ -68,23 +69,40 @@ bool Server::startServer() {
         unsigned char buffer[bufferSize];
 
 
-
-        //TODO add a mutex to the socket so that only one thread at a time can use it
-        //TODO passing variables tot the event_loop is not a problem since we always can pass it's address instead ensurig that the change can be viewed elsewhere
+        //Passing variables tot the event_loop is not a problem since we always can pass it's address instead ensurig that the change can be viewed elsewhere
 
 
         //Dont need to lock the receiving part of the socket since it is full duplex, and only one thread is reading
-        recvfrom(socket_fd, buffer, bufferSize, MSG_WAITALL, (struct sockaddr *) &client,
-                     &length);
+        int n = recvfrom(socket_fd, buffer, bufferSize, MSG_WAITALL, (struct sockaddr *) &client, &length);
         ResponseBuilder builder;
+        bool isError = false;
+        std::cout << buffer << std::endl;
+
         //Passing the address of the variables since we don't want a copy
-        event_loop->post_after([ &server, &client, &socket_fd, &buffer, &builder] {
+        event_loop->post_after([ &server, &client, &socket_fd, &buffer, &builder, &isError] {
             //Dont have to lock sending from the socket since it is full duplex, and it is running in an event loop
             //2048 is equal to MSG_CONFIRM which the IDE does not recognize
-            sendto(socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4),
-                   2048, (const struct sockaddr *) &client, sizeof(client));
-        }, [&builder, &buffer, &client] {
-            builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
+            std::cout << "isError: " << isError << std::endl;
+            if(isError) {
+                //TODO send better error message
+                sendto(socket_fd, (const char *)buffer,sizeof(n), 2048, (const struct sockaddr *) &client, sizeof(client));
+            } else{
+                sendto(socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4),
+                       2048, (const struct sockaddr *) &client, sizeof(client));
+            }
+            //sendto(socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4),
+             //     2048, (const struct sockaddr *) &client, sizeof(client));
+        }, [&builder, &buffer, &client, &isError] {
+            //TODO remove logging of error detection
+            std::cout << "((buffer[0] >> 6) & 3) == 0 && buffer[0] != 0: " << (((buffer[0] >> 6) & 3) == 0 && buffer[0] != 0) << std::endl;
+            if (((buffer[0] >> 6) & 3) == 0 && buffer[0] != 0) {
+                builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
+            } else
+            {
+                isError = true;
+                //TODO Handle error
+            }
+
         });
 
         //TODO remove logging of ipv4 and ipv6 addresses
