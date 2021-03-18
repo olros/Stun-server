@@ -6,7 +6,7 @@ on:
 
 jobs:
   check_should_skip:
-    name: Check if Pipfile has been updated
+    name: Check if frontend has been updated
     runs-on: ubuntu-latest
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
