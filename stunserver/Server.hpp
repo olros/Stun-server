@@ -68,7 +68,7 @@ bool Server::startServer() {
         struct sockaddr_in client;
         socklen_t length = sizeof(client);
         unsigned char buffer[bufferSize];
-        recvfrom(socket_fd, buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr*)(&client),
+        int n = recvfrom(socket_fd, buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr*)(&client),
                      &length);
         ResponseBuilder builder;
         bool isError = false;
@@ -81,24 +81,18 @@ bool Server::startServer() {
             std::cout << "isError: " << isError << std::endl;
             if(isError) {
                 //TODO send better error message
-                sendto(socket_fd, (const char *)buffer,sizeof(n), 2048, (const struct sockaddr *) &client, sizeof(client));
+                sendto(socket_fd, builder.buildErrorResponse().getResponse(),sizeof(struct StunErrorResponse), 2048, (const struct sockaddr *) &client, sizeof(client));
             } else{
                 sendto(socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4),
                        2048, (const struct sockaddr *) &client, sizeof(client));
             }
             //sendto(socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4),
              //     2048, (const struct sockaddr *) &client, sizeof(client));
-        }, [&builder, &buffer, &client, &isError] {
+        }, [&builder, &buffer, &client, &isError, &n] {
+            std::cout << "n: " << n << std::endl;
             //TODO remove logging of error detection
-            std::cout << "error: " << (((buffer[0] >> 6) & 3) == 0 && buffer[0] != 0) << std::endl;
-            if (((buffer[0] >> 6) & 3) == 0) {
-                builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
-            } else
-            {
-                isError = true;
-                //TODO Handle error
-            }
-
+            builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
+            isError =((buffer[0] >> 6) & 3) != 0 || n<20;
         });
 
         //TODO remove logging of ipv4 and ipv6 addresses
