@@ -15,5 +15,5 @@ jobs:
         host: ${{ secrets.VM_IP }}
         username: ${{ secrets.VM_USERNAME }}
         password: ${{ secrets.VM_PASSWORD }}
-        script: sudo ufw allow 8080 && cd IDATT2104-Project && git pull origin && sudo make deploy < /dev/null > /tmp/mylogfile 2>&1 &
+        script: sudo ufw allow 8080 && cd IDATT2104-Project && git pull origin && sudo make deploy < /dev/null > /tmp/mylogfile 2>&1 & exit
         
