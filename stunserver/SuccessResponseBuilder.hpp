@@ -51,7 +51,7 @@ SuccessResponseBuilder&  SuccessResponseBuilder::setlength(bool isIPv4){
 }
 
 SuccessResponseBuilder&  SuccessResponseBuilder::setAttType(int type){
-    res->atttype= htons(XOR_MAPPED_ADdRESSS);
+    res->atttype= htons(XOR_MAPPED_ADDRESSS);
     return *this;
 }
 SuccessResponseBuilder&  SuccessResponseBuilder::setAttLength(bool isIPv4){

@@ -4,7 +4,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <bitset>
 #include "Workers.hpp"
 #include "stuntypes.h"
 #include "ResponseBuilder.hpp"

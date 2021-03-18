@@ -1,5 +1,5 @@
-udp:
-  container_name: my-udp-listener
+server:
+  container_name: stunserver
   environment:
     - UDPPORT=80
   build: ./stunserver

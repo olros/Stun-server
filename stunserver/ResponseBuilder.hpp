@@ -3,6 +3,7 @@
 #include <stdlib.h> 
 #include "SuccessResponseBuilder.hpp"
 #include "ErrorResponseBuilder.hpp"
+#include "stuntypes.h"
 
 const  int COOKIE_LENGTH = 4;
 const uint8_t STUN_COOKIE_B1 = 0x21;
@@ -16,6 +17,7 @@ class ResponseBuilder{
         bool isErrorRequest;
         STUNIncommingHeader* inc;
         sockaddr_in client;
+        void checkHeader();
         void  checkIdentifier();
         void createIdentifier();
 
@@ -35,11 +37,18 @@ ResponseBuilder::ResponseBuilder(bool isIPV4, STUNIncommingHeader* inc, sockaddr
     this->inc = inc;
     this->isIPV4 = isIPV4;
     this->isErrorRequest = false;
+    checkIdentifier();
+    checkHeader();
 
 }
 
+
 bool ResponseBuilder::isError(){
     return isErrorRequest;
+}
+
+void ResponseBuilder::checkHeader(){
+    if(!IS_REQUEST(inc->type))this->isErrorRequest = true;
 }
 
 void ResponseBuilder::checkIdentifier(){
@@ -56,7 +65,7 @@ void ResponseBuilder::createIdentifier(){
     for (int i = 0; i<COOKIE_LENGTH; i++){
         this->inc->identifier[i] = cookie[i];
     }
-    for (int i = 0; i<identifier_size-COOKIE_LENGTH; i++){
+    for (int i = COOKIE_LENGTH; i<identifier_size-COOKIE_LENGTH; i++){
         this->inc->identifier[i] = rand() % 10;
     }
 }
