@@ -94,8 +94,8 @@ bool Server::startServer() {
              //     2048, (const struct sockaddr *) &client, sizeof(client));
         }, [&builder, &buffer, &client, &isError] {
             //TODO remove logging of error detection
-            std::cout << "((buffer[0] >> 6) & 3) == 0 && buffer[0] != 0: " << (((buffer[0] >> 6) & 3) == 0 && buffer[0] != 0) << std::endl;
-            if (((buffer[0] >> 6) & 3) == 0 && buffer[0] != 0) {
+            std::cout << "error: " << (((buffer[0] >> 6) & 3) == 0 && buffer[0] != 0) << std::endl;
+            if (((buffer[0] >> 6) & 3) == 0) {
                 builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
             } else
             {
