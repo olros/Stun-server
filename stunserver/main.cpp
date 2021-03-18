@@ -4,11 +4,11 @@
 
 
 int main() {
-    std::cout << "Server starting..." << std::endl;
+    std::cout << "Stun server starting..." << std::endl;
 
     Server server(80);
     std::cout << server.startServer() << std::endl;
-    std::cout << "Server started!" << std::endl;
+    std::cout << "Stun server started!" << std::endl;
 
     /*
     std::thread server_thread = std::thread([&server] {
