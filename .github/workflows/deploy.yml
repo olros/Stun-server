@@ -47,7 +47,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: build
-          path: build/
+          path: frontend/build/
 
   deploy:
     name: Deploy
@@ -73,7 +73,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: build
-          path: build
+          path: frontend/build
       
       - name: Install firebase-tools
         run: npm i -g firebase-tools

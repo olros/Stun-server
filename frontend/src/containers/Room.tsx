@@ -56,22 +56,6 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     marginBottom: theme.spacing(1),
   },
-  options: {
-    display: 'flex',
-    marginTop: theme.spacing(4),
-    [theme.breakpoints.down('md')]: {
-      flexDirection: 'column',
-    },
-  },
-  option: {
-    width: '100%',
-    height: 60,
-    margin: theme.spacing(0, 1),
-    fontSize: 17,
-    [theme.breakpoints.down('md')]: {
-      margin: theme.spacing(1, 0),
-    },
-  },
   videoButton: {
     height: 40,
     marginBottom: theme.spacing(3),
