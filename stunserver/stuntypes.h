@@ -91,14 +91,20 @@ struct StunErrorResponse{
 
     uint16_t length;
     
-    
     uint8_t identifier[identifier_size];
 
-
     uint16_t atttype;
-    
 
     uint16_t attlength;
+
+
+    uint16_t zeros;
+
+    uint8_t clss;
+
+    uint8_t nr;
+
+    unsigned char reason[128];
 };
 
 #endif

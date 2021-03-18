@@ -27,8 +27,8 @@ ResponseBuilder::ResponseBuilder(bool isIPV4, STUNIncommingHeader* inc, sockaddr
 
 
 SuccessResponseBuilder ResponseBuilder::buildSuccessResponse(){
-    SuccessResponseBuilder builder = SuccessResponseBuilder();
-    return builder.setStunSuccessHeaders(inc)
+    return SuccessResponseBuilder()
+    .setStunSuccessHeaders(inc)
     .setlength(isIPV4)
     .setAttLength(isIPV4)
     .setAttType(0)
@@ -39,11 +39,13 @@ SuccessResponseBuilder ResponseBuilder::buildSuccessResponse(){
 }
 
 ErrorResponseBuilder ResponseBuilder::buildErrorResponse(){
-    ErrorResponseBuilder builder = ErrorResponseBuilder();
-    return builder.setStunErrorHeaders(inc)
+    return ErrorResponseBuilder()
+    .setStunErrorHeaders(inc)
     .setlength()
     .setAttLength()
-    .setAttType();
+    .setAttType()
+    .setAttribute(400)
+    .setMSG("Something went Wrong");
     
 }
 

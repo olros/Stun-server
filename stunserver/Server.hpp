@@ -2,9 +2,10 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
-#include "Workers.hpp"
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <bitset>
+#include "Workers.hpp"
 #include "stuntypes.h"
 #include "ResponseBuilder.hpp"
 
@@ -67,7 +68,7 @@ bool Server::startServer() {
         struct sockaddr_in client;
         socklen_t length = sizeof(client);
         unsigned char buffer[bufferSize];
-        n = recvfrom(socket_fd, buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr*)(&client),
+        recvfrom(socket_fd, buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr*)(&client),
                      &length);
         ResponseBuilder builder;
         bool isError = false;
@@ -111,12 +112,6 @@ bool Server::startServer() {
         // char ip6[16];
         // inet_ntop(AF_INET6, &client_ipv6.sin6_addr, ip6, sizeof(ip6));
         // std::cout << "v6: " << ip6 << " : " << ntohs(client_ipv6.sin6_port) << std::endl;
-
-        ResponseBuilder builder = ResponseBuilder(true, (STUNIncommingHeader*)buffer, client);
- 
-    
-        sendto(socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4), 
-        MSG_CONFIRM, (const struct sockaddr *) &client, sizeof(client));
     }
     close(socket_fd);
     return true;

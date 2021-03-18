@@ -3,6 +3,7 @@
 
 #include "stuntypes.h"
 #include <arpa/inet.h>
+#include <string>
 
 #define ErrorCode 0x0111
 #define ErrorCodeType 0x0009
@@ -17,6 +18,8 @@ class ErrorResponseBuilder{
         ErrorResponseBuilder&  setlength();
         ErrorResponseBuilder&  setAttLength();
         ErrorResponseBuilder&  setAttType();
+        ErrorResponseBuilder&  setAttribute(int code);
+        ErrorResponseBuilder&  setMSG(std::string msg);
 
 };
 ErrorResponseBuilder::ErrorResponseBuilder(){
@@ -36,12 +39,12 @@ ErrorResponseBuilder& ErrorResponseBuilder::setStunErrorHeaders(struct STUNIncom
 }
 
 ErrorResponseBuilder& ErrorResponseBuilder::setlength(){
-    res->length= htons(12);
+    res->length = htons(136);
     return *this;
 }
 
 ErrorResponseBuilder&  ErrorResponseBuilder::setAttLength(){
-    res->attlength = htons(32);
+    res->attlength = htons(132);
     return *this;
 }
 
@@ -49,6 +52,21 @@ ErrorResponseBuilder&  ErrorResponseBuilder::setAttType(){
     res->atttype = htons(ErrorCodeType);
     return *this;
 }
+
+ErrorResponseBuilder&  ErrorResponseBuilder::setAttribute(int code){
+    res->clss = code/100;
+    res->nr = code%100;
+
+    return *this;
+}
+
+ErrorResponseBuilder&  ErrorResponseBuilder::setMSG(std::string msg){
+    for(int i = 0; i<msg.length(); i++){
+        res->reason[i]  = msg[i];
+    }
+    return *this;
+}   
+
 
 
 
