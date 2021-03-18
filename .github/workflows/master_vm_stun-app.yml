@@ -29,5 +29,6 @@ jobs:
           echo "deployed"
         host: ${{ secrets.VM_IP }}
         user: ${{ secrets.VM_USERNAME }}
-        key: ${{ secrets.VM_PASSWORD }}
+        pass : ${{ secrets.VM_PASSWORD }}
+        key: ""
         args: "-tt -vvv"
