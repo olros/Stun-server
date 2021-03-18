@@ -3,7 +3,7 @@ name: Build and deploy container app to Azure Web App - stun-app
 on:
   push:
     branches:
-      - master
+      # - master
   workflow_dispatch:
 
 jobs:
