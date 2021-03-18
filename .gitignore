@@ -42,3 +42,4 @@
 *.exe
 *.out
 *.app
+frontend/.eslintcache
