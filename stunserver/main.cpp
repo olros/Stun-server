@@ -4,7 +4,7 @@
 
 
 int main() {
-    std::cout << "Stun server starting..." << std::endl;
+    std::cout << "Stun server starting, hang on a second..." << std::endl;
 
     Server server(80);
     std::cout << server.startServer() << std::endl;

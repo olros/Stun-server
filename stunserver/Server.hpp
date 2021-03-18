@@ -92,7 +92,7 @@ bool Server::startServer() {
         inet_ntop(AF_INET, &client.sin_addr, ip4, sizeof(ip4));
 
         std::cout << "v4: " << ip4 << " : " << htons(client.sin_addr.s_addr) << " : " << ntohs(client.sin_port) << std::endl;
-        std::cout << "We did it"  << std::endl;
+        std::cout << "New request, yey"  << std::endl;
 
 
         // char ip6[16];
