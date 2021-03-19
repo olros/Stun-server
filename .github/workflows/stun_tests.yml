@@ -25,7 +25,8 @@ jobs:
       run:
         working-directory: ./stunserver
     steps:
+    - uses: actions/checkout@v1
     - name: Running tests
-      run: make test
+      run: docker-compose up test
 
       
