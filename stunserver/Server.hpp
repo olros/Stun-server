@@ -61,6 +61,7 @@ bool Server::startServer() {
     }
 
     while (keep_going) {
+        std::cout <<"uuuu"<<std::endl;
         struct sockaddr_in6 client_ipv6;
         struct sockaddr_in client;
         socklen_t length = sizeof(client);
