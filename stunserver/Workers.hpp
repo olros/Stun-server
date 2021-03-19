@@ -36,7 +36,6 @@ Workers::Workers(int number_of_threads)
 
 void Workers::start()
 {
-    tasks_to_be_done.operator=(0);
     keep_going.operator=(true);
     for (int i = 0; i < n; ++i)
     {
