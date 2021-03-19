@@ -27,6 +27,6 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Running tests
-      run: cd tests && g++-10 -std=c++20 runTests.cpp -o runTests -pthread && runTests
+      run: g++-10 -std=c++20 tests/runTests.cpp -o tests/runTests -pthread && runTests
 
       
