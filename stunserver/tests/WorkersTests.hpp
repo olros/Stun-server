@@ -25,7 +25,7 @@ void test_postAfter_waits_before_running_function() {
     event_loop.stop();
     event_loop.join();
     assert(orderOfCompletion[0] == FINISH_FIRST && orderOfCompletion[1] != FINISH_LAST &&
-           orderOfCompletion.size() == 2);
+           orderOfCompletion.size() != 2);
 }
 
 void test_Post_tasks_are_completed_in_right_order() {
