@@ -18,7 +18,7 @@ jobs:
 
   build:
     needs: check_should_skip
-    if: ${{ needs.check_should_skip.outputs.should_skip != 'true' }}
+    # if: ${{ needs.check_should_skip.outputs.should_skip != 'true' }}
     name: Build
     runs-on: ubuntu-latest
     defaults:
@@ -26,6 +26,6 @@ jobs:
         working-directory: ./stunserver
     steps:
     - name: Running tests
-      run: g++-10 -std=c++20 ./tests/runTests.cpp -o ./tests/runTests -pthread && ./tests/runTests
+      run: ls && g++-10 -std=c++20 ./tests/runTests.cpp -o ./tests/runTests -pthread && ./tests/runTests
 
       
