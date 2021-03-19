@@ -18,7 +18,7 @@ jobs:
         with:
           github_token: ${{ github.token }}
           cancel_others: 'false'
-          paths: '["**/stunserver", "**/makefile", "**/docker-compose.yml"]'
+          paths: '["stunserver/**", "makefile", "docker-compose.yml"]'
 
   build:
     needs: check_should_skip
