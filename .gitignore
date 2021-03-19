@@ -1,6 +1,7 @@
 *
 !*.*
 !*/
+!makefile
 
 **/cmake-build-debug
 /.idea
