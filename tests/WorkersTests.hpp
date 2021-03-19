@@ -3,13 +3,13 @@
 #include <unistd.h>
 #include <cassert>
 
+const string FINISH_FIRST = "Should finish first";
+const string FINISH_LAST = "Should finish be last";
+
 //Lot easier to call global functions than to call class functions
 void test_postAfter_waits_before_running_function() {
     Workers event_loop(1);
     std::vector <std::string> orderOfCompletion;
-
-    const string FINISH_FIRST = "Should finish first";
-    const string FINISH_LAST = "Should finish be last"
 
     event_loop.start();
     event_loop.post_after([&orderOfCompletion] {
