@@ -48,7 +48,7 @@ bool ResponseBuilder::isError(){
 }
 
 void ResponseBuilder::checkHeader(){
-    if(!IS_REQUEST(inc->type))this->isErrorRequest = true;
+    if(!IS_BINDING_REQUEST(inc->type))this->isErrorRequest = true;
 }
 
 void ResponseBuilder::checkIdentifier(){
