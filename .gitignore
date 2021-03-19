@@ -1,6 +1,8 @@
 *
 !*.*
 !*/
+!makefile
+!Dockerfile
 
 **/cmake-build-debug
 /.idea
@@ -8,6 +10,8 @@
 /out
 .DS_Store
 .vscode
+/tests/out
+/stunserver/out
 
 
 # Prerequisites
