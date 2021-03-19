@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 
 // Images
-import GITHUB from '../assets/img/GitHubWhite.png';
+import GITHUB from 'assets/img/GitHubWhite.png';
 
 const useStyles = makeStyles(() => ({
   github: {
