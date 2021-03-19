@@ -8,20 +8,23 @@ void test_postAfter_waits_before_running_function() {
     Workers event_loop(1);
     std::vector <std::string> orderOfCompletion;
 
+    const string FINISH_FIRST = "Should finish first";
+    const string FINISH_LAST = "Should finish be last"
+
     event_loop.start();
     event_loop.post_after([&orderOfCompletion] {
-        orderOfCompletion.emplace_back("Should finish be last");
+        orderOfCompletion.emplace_back(FINISH_LAST);
     }, [] {
         sleep(1);
     });
 
     event_loop.post([&orderOfCompletion] {
-        orderOfCompletion.emplace_back("Should finish first");
+        orderOfCompletion.emplace_back(FINISH_FIRST);
     });
 
     event_loop.stop();
     event_loop.join();
-    assert(orderOfCompletion[0] == "Should finish first" && orderOfCompletion[1] == "Should finish be last" &&
+    assert(orderOfCompletion[0] == FINISH_FIRST && orderOfCompletion[1] == FINISH_LAST &&
            orderOfCompletion.size() == 2);
 }
 

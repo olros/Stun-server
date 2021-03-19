@@ -8,6 +8,8 @@
 /out
 .DS_Store
 .vscode
+/tests/out
+/stunserver/out
 
 
 # Prerequisites
