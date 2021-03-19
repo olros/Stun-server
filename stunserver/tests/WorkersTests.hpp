@@ -1,10 +1,10 @@
-#include "../stunserver/Workers.hpp"
+#include "../Server.hpp"
 #include <string>
 #include <unistd.h>
 #include <cassert>
 
-const string FINISH_FIRST = "Should finish first";
-const string FINISH_LAST = "Should finish be last";
+const std::string FINISH_FIRST = "Should finish first";
+const std::string FINISH_LAST = "Should finish be last";
 
 //Lot easier to call global functions than to call class functions
 void test_postAfter_waits_before_running_function() {
