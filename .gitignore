@@ -2,6 +2,7 @@
 !*.*
 !*/
 !makefile
+!Dockerfile
 
 **/cmake-build-debug
 /.idea
