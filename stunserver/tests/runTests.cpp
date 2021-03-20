@@ -1,8 +1,9 @@
 #include "WorkersTests.hpp"
+#include "SuccessResponseTests.hpp"
 
 
 int main(){
-    WorkersTests workersTests;
-    workersTests.test();
+    WorkersTests().test() ;
+    SuccessResponseTests().test() ;
 }
 
