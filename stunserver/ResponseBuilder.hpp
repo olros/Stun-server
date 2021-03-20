@@ -4,15 +4,8 @@
 #include "SuccessResponseBuilder.hpp"
 #include "ErrorResponseBuilder.hpp"
 #include "stuntypes.h"
-
-const  int COOKIE_LENGTH = 4;
-const uint8_t STUN_COOKIE_B1 = 0x21;
-const uint8_t STUN_COOKIE_B2 = 0x12;
-const uint8_t STUN_COOKIE_B3 = 0xA4;
-const uint8_t STUN_COOKIE_B4 = 0x42;
 class ResponseBuilder{
     private:
-        uint8_t cookie[COOKIE_LENGTH] = {STUN_COOKIE_B1,STUN_COOKIE_B2, STUN_COOKIE_B3, STUN_COOKIE_B4};
         bool isIPV4;
         bool isErrorRequest;
         STUNIncommingHeader* inc;

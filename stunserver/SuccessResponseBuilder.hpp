@@ -10,6 +10,10 @@
 
 
 #define SuccessCode 0x0101
+#define IPV4_LENGTH 12
+#define IPV6_LENGTH 24
+#define IPV4_ATTLENGTH 8
+#define IPV6_ATTLENGTH 20
 class SuccessResponseBuilder{
     private:
         struct STUNResponse* res;
@@ -45,7 +49,7 @@ SuccessResponseBuilder&  SuccessResponseBuilder::setStunSuccessHeaders(struct ST
 }
 
 SuccessResponseBuilder&  SuccessResponseBuilder::setlength(bool isIPv4){
-    res->length = htons(isIPv4? 12: 24);
+    res->length = htons(isIPv4? IPV4_LENGTH: IPV6_LENGTH);
     return *this;
 
 }
@@ -55,7 +59,7 @@ SuccessResponseBuilder&  SuccessResponseBuilder::setAttType(int type){
     return *this;
 }
 SuccessResponseBuilder&  SuccessResponseBuilder::setAttLength(bool isIPv4){
-    res->attlength = htons(isIPv4 ? 8 : 20);
+    res->attlength = htons(isIPv4 ? IPV4_ATTLENGTH : IPV6_ATTLENGTH);
     return *this;
 
 }

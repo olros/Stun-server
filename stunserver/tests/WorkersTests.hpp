@@ -56,7 +56,7 @@ public:
 int WorkersTests::test() {
     test_postAfter_waits_before_running_function();
     test_Post_tasks_are_completed_in_right_order();
-    std::cout << "All test passed" << std::endl;
+    std::cout << "All WorkersTests passed" << std::endl;
     return 0;
 }
 
