@@ -4,7 +4,7 @@
 
 int main() {
     std::cout << "The server is starting, hang on a second..." << std::endl;
-    Server server(80);
+    Server server("8080");
     std::cout << server.startServer() << std::endl;
     std::cout << "Stun server started!" << std::endl;
     return 0;

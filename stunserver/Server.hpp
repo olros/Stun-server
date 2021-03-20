@@ -1,6 +1,8 @@
 #include <iostream>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <netinet/in.h>
+#include <netdb.h>
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -8,15 +10,31 @@
 #include "stuntypes.h"
 #include "ResponseBuilder.hpp"
 
+//Added enum for future possibilities of implementing TLS
+enum SocketType {
+    UDP, TCP
+};
+
 class Server {
 private:
-    int port;
+    char *port;
     Workers *event_loop;
     bool keep_going;
+    int socket_fd;
+    const int BUFFER_SIZE = 256;
+    SocketType sock_type;
+    const int BACKLOG = 5;
+
+    bool init_receive_socket();
+
+    bool handle_udp();
+
+    bool handle_tcp();
+
 public:
     Server();
 
-    Server(int port);
+    Server(char *port, SocketType sock_type);
 
     bool startServer();
 
@@ -27,9 +45,76 @@ public:
 
 Server::Server() {}
 
-Server::Server(int port) {
+Server::Server(char *port, SocketType sock_type) {
     this->port = port;
     this->event_loop = new Workers(1);
+    this->sock_type = sock_type;
+}
+
+bool Server::init_receive_socket() {
+    struct addrinfo serverInfo, *result;
+
+    serverInfo.ai_family = AF_INET;
+    serverInfo.ai_socktype = SOCK_DGRAM;
+    serverInfo.ai_flags = AI_PASSIVE;
+
+    int exit_code;
+    if ((exit_code = getaddrinfo(NULL, port, &serverInfo, &result)) != 0) {
+        std::cerr << "getaddrinfo() failed with error code: " << exit_code << std::endl;
+        return false;
+    }
+
+    //TODO SHOULD I CLOSE HERE AND IN BIND??
+    if ((this->socket_fd = socket(result->ai_family, result->ai_socktype, result->ai_protocol)) == -1) {
+        std::cerr << "socket() failed with error code: " << socket_fd << std::endl;
+        return false;
+    }
+
+    if ((exit_code = bind(socket_fd, result->ai_addr, result->ai_addrlen)) == -1) {
+        std::cerr << "bind() failed with error code: " << exit_code << std::endl;
+        close(this->socket_fd);
+        return false;
+    }
+    return true;
+}
+
+bool Server::handle_udp(ResponseBuilder builder, struct sockaddr_storage client, unsigned char buffer[BUFFER_SIZE], socklen_t length, bool isError) {
+    int n = recvfrom(socket_fd, buffer, sizeof(buffer),
+                     MSG_WAITALL, (struct sockaddr *) (&client), &length);
+    event_loop->post_after([&client, &socket_fd, &buffer, &builder, &isError] {
+        if (isError || builder.isError())
+            sendto(socket_fd, builder.buildErrorResponse(400, "Something went wrong!?").getResponse(),
+                   sizeof(struct StunErrorResponse), MSG_CONFIRM,
+                   (const struct sockaddr *) &client, sizeof(client));
+
+        else
+            sendto(socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4),
+                   MSG_CONFIRM, (const struct sockaddr *) &client, sizeof(client));
+
+    }, [&builder, &buffer, &client, &isError, &n] {
+        builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
+        isError = ((buffer[0] >> 6) & 3) != 0 || n < 20;
+    });
+}
+
+bool Server::handle_tcp(ResponseBuilder builder, struct sockaddr_storage client, unsigned char buffer[BUFFER_SIZE], socklen_t length, bool isError) {
+    int client_socket_fd = accept(socket_fd, (struct sockaddr *) &client, &length);
+    if (client_socket_fd == -1) return false;
+    event_loop->post_after([&builder, &client_socket_fd]{
+        if (isError || builder.isError())
+            send(client_socket_fd, builder.buildErrorResponse(400, "Something went wrong!?").getResponse(),
+                   sizeof(struct StunErrorResponse), MSG_CONFIRM);
+        else
+            send(client_socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4),
+                   MSG_CONFIRM);
+    }, [&builder, &client_socket_fd, &buffer, &BUFFER_SIZE]{
+        int n = recv(client_socket_fd, buffer, BUFFER_SIZE,0);
+        builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
+        isError = ((buffer[0] >> 6) & 3) != 0 || n < 20;
+    });
+
+    close(client_socket_fd);
+    return true;
 }
 
 //NB! Max 5 connections per socket, when using listen method
@@ -38,54 +123,21 @@ bool Server::startServer() {
     event_loop->start();
     keep_going = true;
 
-    struct sockaddr_in server;
-    struct sockaddr_in6 server_ip6;
-    const int bufferSize = 256;
-    int socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (socket_fd == -1) return false;
-
-    //Ipv6
-    // server_ip6.sin6_family=AF_INET6;
-    // server_ip6.sin6_port=htons(this->port);
-    // server_ip6.sin6_addr=in6addr_any;
-
-    //Ipv4
-    server.sin_port = htons(this->port);
-    server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_family = AF_INET;
-
-
-    if(bind(socket_fd, (struct sockaddr*)(&server), sizeof(server)) < 0){
-        close(socket_fd);
-        return false;
-    }
-
+    if (!init_receive_socket()) return false;
+    if (sock_type == TCP) listen(socket_fd, BACKLOG);
     while (keep_going) {
-        std::cout <<"uuuu"<<std::endl;
-        struct sockaddr_in6 client_ipv6;
-        struct sockaddr_in client;
-        socklen_t length = sizeof(client);
+        struct sockaddr_storage client;
         unsigned char buffer[bufferSize];
-        int n = recvfrom(socket_fd, buffer, sizeof(buffer), 
-        MSG_WAITALL, (struct sockaddr*)(&client),&length);
+        socklen_t length = sizeof(client);
         ResponseBuilder builder;
         bool isError = false;
-        event_loop->post_after([ &server, &client, &socket_fd, &buffer, &builder, &isError] {
-            if(isError || builder.isError()) sendto(socket_fd, builder.buildErrorResponse(400, "Something went wrong!?").getResponse(),sizeof(struct StunErrorResponse), MSG_CONFIRM, 
-                (const struct sockaddr *) &client, sizeof(client));
 
-            else sendto(socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4),
-                       MSG_CONFIRM, (const struct sockaddr *) &client, sizeof(client));
-    
-        }, [&builder, &buffer, &client, &isError, &n] {
-            builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
-            isError =((buffer[0] >> 6) & 3) != 0 || n<20;
-        });
-
+        sock_type == TCP ? handle_tcp(&builder, &client, &buffer, &length, &isError) : handle_udp(&builder, &client,
+                                                                                                  &buffer, &length,
+                                                                                                  &isError);
         char ip4[16];
         inet_ntop(AF_INET, &client.sin_addr, ip4, sizeof(ip4));
     }
-    close(socket_fd);
     return true;
 }
 
@@ -93,6 +145,7 @@ void Server::closeServer() {
     event_loop->stop();
     event_loop->join();
     keep_going = false;
+    close(socket_fd);
 }
 
 Server::~Server() {
