@@ -7,6 +7,8 @@
 
 #define ErrorCode 0x0111
 #define ErrorCodeType 0x0009
+#define ERROR_LENGTH 136
+#define ERROR_ATT_LENGTH 136
 
 class ErrorResponseBuilder{
     private:
@@ -40,12 +42,12 @@ ErrorResponseBuilder& ErrorResponseBuilder::setStunErrorHeaders(struct STUNIncom
 }
 
 ErrorResponseBuilder& ErrorResponseBuilder::setlength(){
-    res->length = htons(136);
+    res->length = htons(ERROR_LENGTH);
     return *this;
 }
 
 ErrorResponseBuilder&  ErrorResponseBuilder::setAttLength(){
-    res->attlength = htons(132);
+    res->attlength = htons(ERROR_ATT_LENGTH);
     return *this;
 }
 

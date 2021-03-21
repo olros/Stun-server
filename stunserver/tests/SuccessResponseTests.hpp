@@ -1,3 +1,6 @@
+#ifndef SuccesResponseTests_hpp
+#define SuccesResponseTests_hpp
+
 #include "../SuccessResponseBuilder.hpp"
 #include "../stuntypes.h"
 #include "testUtils.hpp"
@@ -82,3 +85,5 @@ int SuccessResponseTests::test() {
     std::cout << "All SuccessResponseTests passed " << std::endl;
     return 0;
 }
+
+#endif
