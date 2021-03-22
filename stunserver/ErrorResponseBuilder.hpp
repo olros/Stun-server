@@ -8,7 +8,7 @@
 #define ErrorCode 0x0111
 #define ErrorCodeType 0x0009
 #define ERROR_LENGTH 136
-#define ERROR_ATT_LENGTH 136
+#define ERROR_ATT_LENGTH 132
 
 class ErrorResponseBuilder{
     private:
