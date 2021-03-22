@@ -32,9 +32,9 @@ private:
 
     bool init_listening_socket();
 
-    bool handle_udp(ResponseBuilder &builder, sockaddr_in &client, unsigned char (&buffer)[BUFFER_SIZE], socklen_t &length);
+    bool handle_udp(ResponseBuilder &builder, sockaddr_in &client, socklen_t &length);
 
-    bool handle_tcp(ResponseBuilder &builder,sockaddr_in &client, unsigned char (&buffer)[BUFFER_SIZE], socklen_t &length);
+    bool handle_tcp(ResponseBuilder &builder,sockaddr_in &client , socklen_t &length);
 
 public:
     Server();
@@ -76,16 +76,17 @@ bool Server::init_listening_socket() {
     return true;
 }
 
-bool Server::handle_udp(ResponseBuilder &builder, sockaddr_in &client, unsigned char (&buffer)[BUFFER_SIZE], socklen_t &length) {
+bool Server::handle_udp(ResponseBuilder &builder, sockaddr_in &client, socklen_t &length) {
+    unsigned char buffer[BUFFER_SIZE];
     bool isError = false;
-    int n = recvfrom(socket_fd, buffer, sizeof(&buffer),
+    int n = recvfrom(socket_fd, buffer, sizeof(buffer),
                      MSG_WAITALL, (struct sockaddr *) (&client), &length);
     if (n == -1) {
         std::cerr << "recvfrom() failed: " << strerror(n) << std::endl;
         return false;
     }
     event_loop->post_after([&client, this, &buffer, &builder, &isError] {
-        if (isError || builder.isError())
+        if ( isError || builder.isError())
             sendto(this->socket_fd, builder.buildErrorResponse(400, "Something went wrong!?").getResponse(),
                    sizeof(struct StunErrorResponse), MSG_CONFIRM,
                    (const struct sockaddr *) &client, sizeof(client));
@@ -100,7 +101,8 @@ bool Server::handle_udp(ResponseBuilder &builder, sockaddr_in &client, unsigned 
     return true;
 }
 
-bool Server::handle_tcp(ResponseBuilder &builder, struct sockaddr_in &client, unsigned char (&buffer)[BUFFER_SIZE], socklen_t &length) {
+bool Server::handle_tcp(ResponseBuilder &builder, struct sockaddr_in &client, socklen_t &length) {
+    unsigned char buffer[BUFFER_SIZE];
     bool isError = false;
     int client_socket_fd = accept(socket_fd, (struct sockaddr *) &client, &length);
     if (client_socket_fd == -1) return false;
@@ -137,10 +139,7 @@ bool Server::startServer() {
         ResponseBuilder builder;
 
         //Should not matter if we send copies because we will not manipulate parameters here anymore
-        socket_type == TCP ? handle_tcp(builder, client, buffer, length) : handle_udp(builder, client,
-                                                                                                  buffer, length);
-        char ip4[16];
-        inet_ntop(AF_INET, &(((const struct sockaddr_in *)&client)->sin_addr), ip4, sizeof(ip4));
+        socket_type == TCP ? handle_tcp(builder, client, length) : handle_udp(builder, client,length);
     }
     return true;
 }
