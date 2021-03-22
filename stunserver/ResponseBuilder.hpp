@@ -47,8 +47,9 @@ void ResponseBuilder::checkHeader(){
 void ResponseBuilder::checkIdentifier(){
     bool isStun = true;
     for (int i = 0; i<COOKIE_LENGTH; i++){
-        if(this->inc->identifier[i] != cookie[i]){
+        if(inc->identifier[i] != cookie[i]){
             isStun = false;
+            break;
         }
     }
     if(!isStun)createIdentifier();
@@ -56,10 +57,10 @@ void ResponseBuilder::checkIdentifier(){
 void ResponseBuilder::createIdentifier(){
     isErrorRequest = true;
     for (int i = 0; i<COOKIE_LENGTH; i++){
-        this->inc->identifier[i] = cookie[i];
+        inc->identifier[i] = cookie[i];
     }
-    for (int i = COOKIE_LENGTH; i<identifier_size-COOKIE_LENGTH; i++){
-        this->inc->identifier[i] = rand() % 10;
+    for (int i = COOKIE_LENGTH; i < identifier_size; i++){
+        inc->identifier[i] = rand()%10;
     }
 }
 
