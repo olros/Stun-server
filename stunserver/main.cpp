@@ -2,12 +2,12 @@
 #include "Server.hpp"
 #include <thread>
 
-#define SOCKET_PORT "8080"
+#define SOCKET_PORT 80
 int main() {
     std::cout << "The server is starting, hang on a second..." << std::endl;
-    //Server tcp_server(SOCKET_PORT, SocketType::TCP);
-    Server udp_server(SOCKET_PORT, SocketType::UDP);
-    udp_server.startServer();
+    Server tcp_server(SOCKET_PORT, SocketType::TCP);
+    //Server udp_server(SOCKET_PORT, SocketType::UDP);
+    std::cout << tcp_server.startServer() << std::endl;
    /* std::thread tcp([&tcp_server]{
         tcp_server.startServer();
     });*/
