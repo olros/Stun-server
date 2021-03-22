@@ -66,7 +66,7 @@ Server::Server(int socket_port, SocketType sock_type) {
 }
 
 bool Server::init_listening_socket() {
-    this->socket_fd = socket(AF_INET, this->socket_type == TCP ? SOCK_STREAM : SOCK_DGRAM, 0);
+    this->socket_fd = socket(AF_INET, this->socket_type == UDP ? SOCK_DGRAM : SOCK_STREAM, 0);
     if (this->socket_fd == -1){
         std::cerr << "socket() failed: " << strerror(this->socket_fd) << std::endl;
         return false;
@@ -138,7 +138,9 @@ bool Server::handle_tls(ResponseBuilder &builder, sockaddr_in &client, unsigned 
     bool is_SSL_error = false;
     std::cout << "halla" << std::endl;
     int client_socket_fd = accept(socket_fd, (struct sockaddr *) &client, &length);
+    //TODO remove when finished testing
     std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::cout << client_socket_fd << std::endl;
     if (client_socket_fd == -1) return false;
     SSL *ssl;
     std::cout << ssl << std::endl;
