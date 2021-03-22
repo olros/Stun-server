@@ -8,7 +8,7 @@ const configuration = {
   iceServers: [
     {
       // urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
-      urls: ['stun:stunserver.northeurope.cloudapp.azure.com:8080'],
+      urls: ['stun:stunserver.northeurope.cloudapp.azure.com:3478'],
     },
   ],
   iceCandidatePoolSize: 10,
