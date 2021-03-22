@@ -21,7 +21,6 @@ enum SocketType {
 };
 
 
-//TODO change the client struct to sockaddr_storage to support both ipv4 and ipv6
 class Server {
 private:
     int port;
@@ -79,14 +78,12 @@ bool Server::init_listening_socket() {
 
 bool Server::handle_udp(ResponseBuilder &builder, sockaddr_in &client, unsigned char (&buffer)[BUFFER_SIZE], socklen_t &length) {
     bool isError = false;
-    std::cout << "waiting" << std::endl;
     int n = recvfrom(socket_fd, buffer, sizeof(&buffer),
                      MSG_WAITALL, (struct sockaddr *) (&client), &length);
     if (n == -1) {
         std::cerr << "recvfrom() failed: " << strerror(n) << std::endl;
         return false;
     }
-    std::cout << "received" << std::endl;
     event_loop->post_after([&client, this, &buffer, &builder, &isError] {
         if (isError || builder.isError())
             sendto(this->socket_fd, builder.buildErrorResponse(400, "Something went wrong!?").getResponse(),
@@ -96,7 +93,6 @@ bool Server::handle_udp(ResponseBuilder &builder, sockaddr_in &client, unsigned 
         else
             sendto(this->socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4),
                    MSG_CONFIRM, (const struct sockaddr *) &client, sizeof(client));
-        std::cout << "message sent back" << std::endl;
     }, [&builder, &buffer, &client, &isError, &n] {
         builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
         isError = ((buffer[0] >> 6) & 3) != 0 || n < 20;
@@ -107,15 +103,12 @@ bool Server::handle_udp(ResponseBuilder &builder, sockaddr_in &client, unsigned 
 bool Server::handle_tcp(ResponseBuilder &builder, struct sockaddr_in &client, unsigned char (&buffer)[BUFFER_SIZE], socklen_t &length) {
     bool isError = false;
     int client_socket_fd = accept(socket_fd, (struct sockaddr *) &client, &length);
-    std::cout << "client_socket_fd: " << client_socket_fd << std::endl;
     if (client_socket_fd == -1) return false;
     event_loop->post_after([&builder, &client_socket_fd, &isError]{
-        if (isError || builder.isError()){
-            /*send(client_socket_fd, builder.buildErrorResponse(400, "Something went wrong!?").getResponse(),
-                   sizeof(struct StunErrorResponse), MSG_CONFIRM);*/
-            std::cout << sizeof(struct STUNResponseIPV4) << std::endl;
-        send(client_socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4),
-             MSG_CONFIRM);}
+        if (isError || builder.isError())
+            send(client_socket_fd, builder.buildErrorResponse(400, "Something went wrong!?").getResponse(),
+                   sizeof(struct StunErrorResponse), MSG_CONFIRM);
+
         else
             send(client_socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4),
                    MSG_CONFIRM);
@@ -130,16 +123,14 @@ bool Server::handle_tcp(ResponseBuilder &builder, struct sockaddr_in &client, un
     return true;
 }
 
-//NB! Max 5 connections per socket, when using listen method
-//NB! Implement solutions that don differentiate between ipv6 and ipv4, maybe one thread for each, and take in the protocol in constructor
 bool Server::startServer() {
+
     event_loop->start();
     keep_going = true;
 
     if (!init_listening_socket()) return false;
     if (socket_type == TCP) listen(socket_fd, BACKLOG);
     while (keep_going) {
-        //TODO change to sockaddr_storage to support both ipv4 and ipv6
         struct sockaddr_in client;
         unsigned char buffer[BUFFER_SIZE];
         socklen_t length = sizeof(client);
