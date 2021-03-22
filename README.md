@@ -15,6 +15,7 @@ Insert overview of missing features.....
 * g++10 or later
 * C++20 or later
 * Docker
+* Openssl
 
 ## Dependencies
 Insert dependencies used....
@@ -35,5 +36,8 @@ Insert dependencies used....
 * [RFC documentation for STUN](https://tools.ietf.org/html/rfc5389)
 * [Wikipedia](https://en.wikipedia.org/wiki/STUN)
 * [IBM accpet IPv4 and IPv6](https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_72/rzab6/xacceptboth.htm)
+* [Older TLS server in C](https://wiki.openssl.org/index.php/Simple_TLS_Server)
+* [Newer TLS server in C](https://aticleworld.com/ssl-server-client-using-openssl-in-c/)
+* [Beej guide to network programming](https://beej.us/guide/bgnet/html/)
 * Add resources for xor-ing bytes...
 

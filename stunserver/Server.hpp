@@ -11,13 +11,15 @@
 #include "stuntypes.h"
 #include "ResponseBuilder.hpp"
 #include <errno.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 
 #define BUFFER_SIZE 256
 #define BACKLOG 5
 //Added enum for future possibilities of implementing TLS
 enum SocketType {
-    UDP, TCP
+    UDP, TCP, TLS
 };
 
 
@@ -29,6 +31,8 @@ private:
     int socket_fd;
     SocketType socket_type;
     struct addrinfo *result;
+    SSL_CTX *context;
+
 
     bool init_listening_socket();
 
@@ -36,6 +40,11 @@ private:
 
     bool handle_tcp(ResponseBuilder &builder,sockaddr_in &client, unsigned char (&buffer)[BUFFER_SIZE], socklen_t &length);
 
+    bool handle_tls(ResponseBuilder &builder,sockaddr_in &client, unsigned char (&buffer)[BUFFER_SIZE], socklen_t &length);
+
+    bool init_tls();
+
+    void cleanup_tls();
 public:
     Server();
 
@@ -123,22 +132,112 @@ bool Server::handle_tcp(ResponseBuilder &builder, struct sockaddr_in &client, un
     return true;
 }
 
-bool Server::startServer() {
+bool Server::handle_tls(ResponseBuilder &builder, sockaddr_in &client, unsigned char (&buffer)[256],
+                        socklen_t &length) {
+    bool isError = false;
+    bool is_SSL_error = false;
+    std::cout << "halla" << std::endl;
+    int client_socket_fd = accept(socket_fd, (struct sockaddr *) &client, &length);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    if (client_socket_fd == -1) return false;
+    SSL *ssl;
+    std::cout << ssl << std::endl;
+    std::cout << "hei" << std::endl;
+    /*event_loop->post_after([*ssl, &builder, &client_socket_fd, &isError, &is_SSL_error]{
+        if(is_SSL_error)
+            send(client_socket_fd, builder.buildErrorResponse(400, "TLS connection could not be established.").getResponse(),
+                 sizeof(struct StunErrorResponse), MSG_CONFIRM);
+        //TODO may need to change to strlen instead of sizeof
+        else if (isError || builder.isError())
+            SSL_write(ssl, builder.buildErrorResponse(400, "Something went wrong!?").getResponse(), sizeof(struct STUNResponseIPV4))
+        else
+            SSL_write(ssl, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4));
+        SSL_shutdown(ssl);
+        SSL_free(ssl)
+        close(client_socket_fd);
+    }, [this, *ssl, &builder, &client_socket_fd, &buffer, &isError, &is_SSL_error, client]{
+        //TODO correct???
+        ssl = SSL_new(this->context);
+        SSL_set_fd(ssl, client_socket_fd);
+        if(SSL_accept(ssl) <= 0) is_SSL_error = true;
+        int n = SSL_read(ssl, buffer, BUFFER_SIZE);
+        if(n == -1) std::cerr << "recv() failed: " << n << std::endl;
+        builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
+        isError = ((buffer[0] >> 6) & 3) != 0 || n < 20;
+    });*/
+    return true;
+}
 
+bool Server::init_tls() {
+    int error_code;
+
+    SSL_library_init();
+    SSL_load_error_strings();
+    OpenSSL_add_ssl_algorithms();
+
+
+    const SSL_METHOD *method;
+
+    method = TLS_server_method();
+    context= SSL_CTX_new(method);
+    if(!context){
+        std::cerr << "SSL_CTX_new() did not work" << std::endl;
+        return false;
+    }
+
+    SSL_CTX_set_ecdh_auto(context, 1);
+
+    if((error_code = SSL_CTX_use_certificate_file(context, "cert.pem", SSL_FILETYPE_PEM)) <= 0){
+        std::cerr << "SSL_CTX_use_certificate_file had an error: " << error_code << std::endl;
+        return false;
+    }
+
+    if((error_code = SSL_CTX_use_PrivateKey_file(context, "key.pem", SSL_FILETYPE_PEM)) <= 0){
+        std::cerr << "SSL_CTX_use_PrivateKey_file had an error: " << error_code << std::endl;
+        return false;
+    }
+
+    if(!SSL_CTX_check_private_key(context)){
+        std::cerr << "Certificate and private key do not match: " << error_code << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+void Server::cleanup_tls() {
+    SSL_CTX_free(context);
+    EVP_cleanup();
+}
+
+bool Server::startServer() {
     event_loop->start();
     keep_going = true;
 
     if (!init_listening_socket()) return false;
-    if (socket_type == TCP) listen(socket_fd, BACKLOG);
+    if (socket_type != UDP) listen(socket_fd, BACKLOG);
+    //Will only run if socket_type is TLS
+    if(socket_type == TLS && !init_tls()) return false;
     while (keep_going) {
         struct sockaddr_in client;
         unsigned char buffer[BUFFER_SIZE];
         socklen_t length = sizeof(client);
         ResponseBuilder builder;
 
-        //Should not matter if we send copies because we will not manipulate parameters here anymore
-        socket_type == TCP ? handle_tcp(builder, client, buffer, length) : handle_udp(builder, client,
-                                                                                                  buffer, length);
+        switch (socket_type) {
+            case UDP:
+                handle_udp(builder, client,buffer, length);
+                break;
+            case TCP:
+                handle_tcp(builder, client, buffer, length);
+                break;
+            case TLS:
+                handle_tls(builder, client, buffer, length);
+                break;
+            default:
+                return false;
+        }
+
         char ip4[16];
         inet_ntop(AF_INET, &(((const struct sockaddr_in *)&client)->sin_addr), ip4, sizeof(ip4));
     }
