@@ -28,7 +28,7 @@ public:
 int ResponseBuilderTests::test() {
     test_non_stun_request_sets_error_true();
     test_stun_request_sets_error_false();
-    std::cout << "All ErrorResponseTests passed " << std::endl;
+    std::cout << "All ResponseBuilderTests passed " << std::endl;
     return 0;
 }
 
