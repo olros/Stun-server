@@ -6,8 +6,8 @@ services:
         - UDPPORT=80
       build: .
       ports:
-      - "8080:80"
-      - "8080:80/udp"
+      - "3478:3478"
+      - "3478:3478/udp"
     test:
       container_name: tests
       build: 
