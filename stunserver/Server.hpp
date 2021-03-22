@@ -38,21 +38,21 @@ bool Server::startServer() {
     event_loop->start();
     keep_going = true;
 
-    struct sockaddr_in server;
-    struct sockaddr_in6 server_ip6;
+    //struct sockaddr_in server;
+    struct sockaddr_in6 server;
     const int bufferSize = 256;
-    int socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
+    int socket_fd = socket(AF_INET6, SOCK_DGRAM, 0);
     if (socket_fd == -1) return false;
 
     //Ipv6
-    // server_ip6.sin6_family=AF_INET6;
-    // server_ip6.sin6_port=htons(this->port);
-    // server_ip6.sin6_addr=in6addr_any;
+    server.sin6_family=AF_INET6;
+    server.sin6_port=htons(this->port);
+    server.sin6_addr=in6addr_any;
 
     //Ipv4
-    server.sin_port = htons(this->port);
-    server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_family = AF_INET;
+    //server.sin_port = htons(this->port);
+    //server.sin_addr.s_addr = INADDR_ANY;
+    //server.sin_family = AF_INET;
 
 
     if(bind(socket_fd, (struct sockaddr*)(&server), sizeof(server)) < 0){
@@ -62,8 +62,8 @@ bool Server::startServer() {
 
     while (keep_going) {
         std::cout <<"uuuu"<<std::endl;
-        struct sockaddr_in6 client_ipv6;
-        struct sockaddr_in client;
+        struct sockaddr_in6 client;
+        //struct sockaddr_in client;
         socklen_t length = sizeof(client);
         unsigned char buffer[bufferSize];
         int n = recvfrom(socket_fd, buffer, sizeof(buffer), 
@@ -82,8 +82,8 @@ bool Server::startServer() {
             isError =((buffer[0] >> 6) & 3) != 0 || n<20;
         });
 
-        char ip4[16];
-        inet_ntop(AF_INET, &client.sin_addr, ip4, sizeof(ip4));
+        char ip6[16];
+        inet_ntop(AF_INET6, &client.sin_addr, ip6, sizeof(ip6));
     }
     close(socket_fd);
     return true;
