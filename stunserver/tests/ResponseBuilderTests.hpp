@@ -10,14 +10,14 @@
 
 void test_non_stun_request_sets_error_true(){
     char * request = (char *)malloc(sizeof(char));
-    ResponseBuilder testBulder = ResponseBuilder(true, (STUNIncommingHeader *)request, create_client());
-    assert(testBulder.isError()== true);
+    ResponseBuilder test_builder = ResponseBuilder(true, (STUNIncomingHeader *)request, create_client());
+    assert(test_builder.is_error()== true);
 }
 
 void test_stun_request_sets_error_false(){
-    STUNIncommingHeader * request = createStunRequest();
-    ResponseBuilder testBulder = ResponseBuilder(true, request, create_client());
-    assert(testBulder.isError() == false);
+    STUNIncomingHeader * request = create_stun_request();
+    ResponseBuilder test_builder = ResponseBuilder(true, request, create_client());
+    assert(test_builder.is_error() == false);
 }
 
 class ResponseBuilderTests {

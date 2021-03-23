@@ -15,25 +15,25 @@ class ErrorResponseBuilder{
         struct StunErrorResponse* res;
 
     public:
-        StunErrorResponse* getResponse();
+        StunErrorResponse* get_response();
         ErrorResponseBuilder();
-        ErrorResponseBuilder&  setStunErrorHeaders(struct STUNIncommingHeader* inc);
-        ErrorResponseBuilder&  setlength();
-        ErrorResponseBuilder&  setAttLength();
-        ErrorResponseBuilder&  setAttType();
-        ErrorResponseBuilder&  setAttribute(int code);
-        ErrorResponseBuilder&  setMSG(std::string msg);
+        ErrorResponseBuilder&  set_stun_error_headers(struct STUNIncomingHeader* inc);
+        ErrorResponseBuilder&  set_length();
+        ErrorResponseBuilder&  set_att_length();
+        ErrorResponseBuilder&  set_att_type();
+        ErrorResponseBuilder&  set_attribute(int code);
+        ErrorResponseBuilder&  set_message(std::string msg);
 
 };
 ErrorResponseBuilder::ErrorResponseBuilder(){
     res = (StunErrorResponse*) malloc(sizeof(struct StunErrorResponse));
 }
 
-struct StunErrorResponse* ErrorResponseBuilder::getResponse(){
+struct StunErrorResponse* ErrorResponseBuilder::get_response(){
     return res;
 }
 
-ErrorResponseBuilder& ErrorResponseBuilder::setStunErrorHeaders(struct STUNIncommingHeader* inc){
+ErrorResponseBuilder& ErrorResponseBuilder::set_stun_error_headers(struct STUNIncomingHeader* inc){
     res->type = htons(ErrorCode);
     for(int i = 0; i < identifier_size; i++){
         res->identifier[i] = inc->identifier[i];
@@ -41,40 +41,33 @@ ErrorResponseBuilder& ErrorResponseBuilder::setStunErrorHeaders(struct STUNIncom
     return *this;
 }
 
-ErrorResponseBuilder& ErrorResponseBuilder::setlength(){
+ErrorResponseBuilder& ErrorResponseBuilder::set_length(){
     res->length = htons(ERROR_LENGTH);
     return *this;
 }
 
-ErrorResponseBuilder&  ErrorResponseBuilder::setAttLength(){
-    res->attlength = htons(ERROR_ATT_LENGTH);
+ErrorResponseBuilder&  ErrorResponseBuilder::set_att_length(){
+    res->att_length = htons(ERROR_ATT_LENGTH);
     return *this;
 }
 
-ErrorResponseBuilder&  ErrorResponseBuilder::setAttType(){
-    res->atttype = htons(ErrorCodeType);
+ErrorResponseBuilder&  ErrorResponseBuilder::set_att_type(){
+    res->att_type = htons(ErrorCodeType);
     return *this;
 }
 
-ErrorResponseBuilder&  ErrorResponseBuilder::setAttribute(int code){
-    res->clss = code/100;
+ErrorResponseBuilder&  ErrorResponseBuilder::set_attribute(int code){
+    res->error_class = code/100;
     res->nr = code%100;
 
     return *this;
 }
 
-ErrorResponseBuilder&  ErrorResponseBuilder::setMSG(std::string msg){
+ErrorResponseBuilder&  ErrorResponseBuilder::set_message(std::string msg){
     for(int i = 0; i<msg.length(); i++){
         res->reason[i]  = msg[i];
     }
     return *this;
 }   
-
-
-
-
-
-
-
 
 #endif

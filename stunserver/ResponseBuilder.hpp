@@ -6,56 +6,56 @@
 #include "stuntypes.h"
 class ResponseBuilder{
     private:
-        bool isIPV4;
-        bool isErrorRequest;
-        STUNIncommingHeader* inc;
+        bool is_IPV4;
+        bool is_error_request;
+        STUNIncomingHeader* inc;
         sockaddr_in client;
-        void checkHeader();
-        void  checkIdentifier();
-        void createIdentifier();
+        void check_header();
+        void  check_identifier();
+        void create_identifier();
 
     public:
-        bool isError();
+        bool is_error();
         ResponseBuilder();
-        ResponseBuilder(bool isIPV4, STUNIncommingHeader* inc, sockaddr_in client);
-        SuccessResponseBuilder buildSuccessResponse();
-        ErrorResponseBuilder buildErrorResponse(int errorCode, std::string errorMsg);
+        ResponseBuilder(bool is_IPV4, STUNIncomingHeader* inc, sockaddr_in client);
+        SuccessResponseBuilder build_success_response();
+        ErrorResponseBuilder build_error_response(int error_code, std::string error_msg);
 
 };
 
 ResponseBuilder::ResponseBuilder() {}
 
-ResponseBuilder::ResponseBuilder(bool isIPV4, STUNIncommingHeader* inc, sockaddr_in client){
+ResponseBuilder::ResponseBuilder(bool is_IPV4, STUNIncomingHeader* inc, sockaddr_in client){
     this->client = client;
     this->inc = inc;
-    this->isIPV4 = isIPV4;
-    this->isErrorRequest = false;
-    checkIdentifier();
-    checkHeader();
+    this->is_IPV4 = is_IPV4;
+    this->is_error_request = false;
+    check_identifier();
+    check_header();
 
 }
 
 
-bool ResponseBuilder::isError(){
-    return isErrorRequest;
+bool ResponseBuilder::is_error(){
+    return is_error_request;
 }
 
-void ResponseBuilder::checkHeader(){
-    if(!IS_BINDING_REQUEST(inc->type))this->isErrorRequest = true;
+void ResponseBuilder::check_header(){
+    if(!IS_BINDING_REQUEST(inc->type))this->is_error_request = true;
 }
 
-void ResponseBuilder::checkIdentifier(){
-    bool isStun = true;
+void ResponseBuilder::check_identifier(){
+    bool is_stun = true;
     for (int i = 0; i<COOKIE_LENGTH; i++){
         if(inc->identifier[i] != cookie[i]){
-            isStun = false;
+            is_stun = false;
             break;
         }
     }
-    if(!isStun)createIdentifier();
+    if(!is_stun)create_identifier();
 }
-void ResponseBuilder::createIdentifier(){
-    isErrorRequest = true;
+void ResponseBuilder::create_identifier(){
+    is_error_request = true;
     for (int i = 0; i<COOKIE_LENGTH; i++){
         inc->identifier[i] = cookie[i];
     }
@@ -64,26 +64,26 @@ void ResponseBuilder::createIdentifier(){
     }
 }
 
-SuccessResponseBuilder ResponseBuilder::buildSuccessResponse(){
+SuccessResponseBuilder ResponseBuilder::build_success_response(){
     return SuccessResponseBuilder()
-    .setStunSuccessHeaders(inc)
-    .setlength(isIPV4)
-    .setAttLength(isIPV4)
-    .setAttType(0)
-    .setProtocol(isIPV4)
-    .XORAttributes(client.sin_addr.s_addr, client.sin_port, isIPV4)
-    .setPadding(0);
+    .set_stun_success_headers(inc)
+    .set_length(is_IPV4)
+    .set_att_length(is_IPV4)
+    .set_att_type(0)
+    .set_protocol(is_IPV4)
+    .XOR_attributes(client.sin_addr.s_addr, client.sin_port, is_IPV4)
+    .set_padding(0);
     
 }
 
-ErrorResponseBuilder ResponseBuilder::buildErrorResponse(int errorCode, std::string errorMsg){
+ErrorResponseBuilder ResponseBuilder::build_error_response(int error_code, std::string error_msg){
     return ErrorResponseBuilder()
-    .setStunErrorHeaders(inc)
-    .setlength()
-    .setAttLength()
-    .setAttType()
-    .setAttribute(errorCode)
-    .setMSG(errorMsg);
+    .set_stun_error_headers(inc)
+    .set_length()
+    .set_att_length()
+    .set_att_type()
+    .set_attribute(error_code)
+    .set_message(error_msg);
     
 }
 
