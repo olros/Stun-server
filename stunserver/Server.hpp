@@ -17,6 +17,7 @@
 
 #define BUFFER_SIZE 256
 #define BACKLOG 5
+#define ERROR_CODE 400
 //Added enum for future possibilities of implementing TLS
 enum SocketType {
     UDP, TCP, TLS
@@ -36,11 +37,11 @@ private:
 
     bool init_listening_socket();
 
-    bool handle_udp(ResponseBuilder &builder, sockaddr_in &client, unsigned char (&buffer)[BUFFER_SIZE], socklen_t &length);
+    bool handle_udp(ResponseBuilder &builder, sockaddr_in &client, socklen_t &length);
 
-    bool handle_tcp(ResponseBuilder &builder,sockaddr_in &client, unsigned char (&buffer)[BUFFER_SIZE], socklen_t &length);
+    bool handle_tcp(ResponseBuilder &builder,sockaddr_in &client , socklen_t &length);
 
-    bool handle_tls(ResponseBuilder &builder,sockaddr_in &client, unsigned char (&buffer)[BUFFER_SIZE], socklen_t &length);
+    bool handle_tls(ResponseBuilder &builder,sockaddr_in &client, socklen_t &length);
 
     bool init_tls();
 
@@ -85,17 +86,18 @@ bool Server::init_listening_socket() {
     return true;
 }
 
-bool Server::handle_udp(ResponseBuilder &builder, sockaddr_in &client, unsigned char (&buffer)[BUFFER_SIZE], socklen_t &length) {
+bool Server::handle_udp(ResponseBuilder &builder, sockaddr_in &client, socklen_t &length) {
+    unsigned char buffer[BUFFER_SIZE];
     bool isError = false;
-    int n = recvfrom(socket_fd, buffer, sizeof(&buffer),
+    int n = recvfrom(socket_fd, buffer, sizeof(buffer),
                      MSG_WAITALL, (struct sockaddr *) (&client), &length);
     if (n == -1) {
         std::cerr << "recvfrom() failed: " << strerror(n) << std::endl;
         return false;
     }
     event_loop->post_after([&client, this, &buffer, &builder, &isError] {
-        if (isError || builder.isError())
-            sendto(this->socket_fd, builder.buildErrorResponse(400, "Something went wrong!?").getResponse(),
+        if ( isError || builder.isError())
+            sendto(this->socket_fd, builder.buildErrorResponse(ERROR_CODE, "Something went wrong!?").getResponse(),
                    sizeof(struct StunErrorResponse), MSG_CONFIRM,
                    (const struct sockaddr *) &client, sizeof(client));
 
@@ -109,13 +111,14 @@ bool Server::handle_udp(ResponseBuilder &builder, sockaddr_in &client, unsigned 
     return true;
 }
 
-bool Server::handle_tcp(ResponseBuilder &builder, struct sockaddr_in &client, unsigned char (&buffer)[BUFFER_SIZE], socklen_t &length) {
+bool Server::handle_tcp(ResponseBuilder &builder, struct sockaddr_in &client, socklen_t &length) {
+    unsigned char buffer[BUFFER_SIZE];
     bool isError = false;
     int client_socket_fd = accept(socket_fd, (struct sockaddr *) &client, &length);
     if (client_socket_fd == -1) return false;
     event_loop->post_after([&builder, &client_socket_fd, &isError]{
         if (isError || builder.isError())
-            send(client_socket_fd, builder.buildErrorResponse(400, "Something went wrong!?").getResponse(),
+            send(client_socket_fd, builder.buildErrorResponse(ERROR_CODE, "Something went wrong!?").getResponse(),
                    sizeof(struct StunErrorResponse), MSG_CONFIRM);
 
         else
@@ -132,8 +135,9 @@ bool Server::handle_tcp(ResponseBuilder &builder, struct sockaddr_in &client, un
     return true;
 }
 
-bool Server::handle_tls(ResponseBuilder &builder, sockaddr_in &client, unsigned char (&buffer)[256],
+bool Server::handle_tls(ResponseBuilder &builder, sockaddr_in &client,
                         socklen_t &length) {
+    unsigned char buffer[BUFFER_SIZE];
     bool isError = false;
     bool is_SSL_error = false;
     int client_socket_fd = accept(socket_fd, (struct sockaddr *) &client, &length);
@@ -143,18 +147,16 @@ bool Server::handle_tls(ResponseBuilder &builder, sockaddr_in &client, unsigned 
     std::cout << "hei" << std::endl;
     event_loop->post_after([&ssl, &builder, &client_socket_fd, &isError, &is_SSL_error]{
         if(is_SSL_error)
-            send(client_socket_fd, builder.buildErrorResponse(400, "TLS connection could not be established.").getResponse(),
+            send(client_socket_fd, builder.buildErrorResponse(ERROR_CODE, "TLS connection could not be established.").getResponse(),
                  sizeof(struct StunErrorResponse), MSG_CONFIRM);
-        //TODO may need to change to strlen instead of sizeof
         else if (isError || builder.isError())
-            SSL_write(ssl, builder.buildErrorResponse(400, "Something went wrong!?").getResponse(), sizeof(struct STUNResponseIPV4));
+            SSL_write(ssl, builder.buildErrorResponse(400, "Something went wrong!?").getResponse(), sizeof(struct StunErrorResponse));
         else
             SSL_write(ssl, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4));
         SSL_shutdown(ssl);
         SSL_free(ssl);
         close(client_socket_fd);
     }, [this, &ssl, &builder, &client_socket_fd, &buffer, &isError, &is_SSL_error, client]{
-        //TODO correct???
         ssl = SSL_new(this->context);
         SSL_set_fd(ssl, client_socket_fd);
         if(SSL_accept(ssl) <= 0) is_SSL_error = true;
@@ -218,26 +220,22 @@ bool Server::startServer() {
     if(socket_type == TLS && !init_tls()) return false;
     while (keep_going) {
         struct sockaddr_in client;
-        unsigned char buffer[BUFFER_SIZE];
         socklen_t length = sizeof(client);
         ResponseBuilder builder;
 
         switch (socket_type) {
             case UDP:
-                handle_udp(builder, client,buffer, length);
+                handle_udp(builder, client,length);
                 break;
             case TCP:
-                handle_tcp(builder, client, buffer, length);
+                handle_tcp(builder, client, length);
                 break;
             case TLS:
-                handle_tls(builder, client, buffer, length);
+                handle_tls(builder, client, length);
                 break;
             default:
                 return false;
         }
-
-        char ip4[16];
-        inet_ntop(AF_INET, &(((const struct sockaddr_in *)&client)->sin_addr), ip4, sizeof(ip4));
     }
     return true;
 }

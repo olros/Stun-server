@@ -4,8 +4,6 @@
 
 #define SOCKET_PORT 3478
 #define TLS_PORT 5349
-//Bad practise but this project will never be put to commercial use and therefore we do it this way
-#define PRIVAT_KEY_PASSWORD "1234"
 
 int main() {
     std::cout << "The server is starting, hang on a second..." << std::endl;
