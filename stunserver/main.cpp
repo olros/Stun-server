@@ -6,21 +6,20 @@
 #define TLS_PORT 5349
 //Bad practise but this project will never be put to commercial use and therefore we do it this way
 #define PRIVAT_KEY_PASSWORD "1234"
+
 int main() {
     std::cout << "The server is starting, hang on a second..." << std::endl;
     Server tcp_server(SOCKET_PORT, SocketType::TCP);
     Server udp_server(SOCKET_PORT, SocketType::UDP);
     Server tls_server(TLS_PORT, SocketType::TLS);
-    std::thread tcp([&tcp_server]{
+    std::thread tcp([&tcp_server] {
         tcp_server.startServer();
     });
-    std::thread udp([&udp_server]{
+    std::thread udp([&udp_server] {
         udp_server.startServer();
     });
-    std::thread tls([&tls_server]{
-        std::cout << "tls" << std::endl;
-        std::cout << tls_server.startServer() << std::endl;
-        //tls_server.startServer();
+    std::thread tls([&tls_server] {
+        tls_server.startServer();
     });
     std::cout << "Stun server started!" << std::endl;
 

@@ -136,28 +136,24 @@ bool Server::handle_tls(ResponseBuilder &builder, sockaddr_in &client, unsigned 
                         socklen_t &length) {
     bool isError = false;
     bool is_SSL_error = false;
-    std::cout << "halla" << std::endl;
     int client_socket_fd = accept(socket_fd, (struct sockaddr *) &client, &length);
-    //TODO remove when finished testing
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    std::cout << client_socket_fd << std::endl;
     if (client_socket_fd == -1) return false;
     SSL *ssl;
     std::cout << ssl << std::endl;
     std::cout << "hei" << std::endl;
-    /*event_loop->post_after([*ssl, &builder, &client_socket_fd, &isError, &is_SSL_error]{
+    event_loop->post_after([&ssl, &builder, &client_socket_fd, &isError, &is_SSL_error]{
         if(is_SSL_error)
             send(client_socket_fd, builder.buildErrorResponse(400, "TLS connection could not be established.").getResponse(),
                  sizeof(struct StunErrorResponse), MSG_CONFIRM);
         //TODO may need to change to strlen instead of sizeof
         else if (isError || builder.isError())
-            SSL_write(ssl, builder.buildErrorResponse(400, "Something went wrong!?").getResponse(), sizeof(struct STUNResponseIPV4))
+            SSL_write(ssl, builder.buildErrorResponse(400, "Something went wrong!?").getResponse(), sizeof(struct STUNResponseIPV4));
         else
             SSL_write(ssl, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4));
         SSL_shutdown(ssl);
-        SSL_free(ssl)
+        SSL_free(ssl);
         close(client_socket_fd);
-    }, [this, *ssl, &builder, &client_socket_fd, &buffer, &isError, &is_SSL_error, client]{
+    }, [this, &ssl, &builder, &client_socket_fd, &buffer, &isError, &is_SSL_error, client]{
         //TODO correct???
         ssl = SSL_new(this->context);
         SSL_set_fd(ssl, client_socket_fd);
@@ -166,7 +162,7 @@ bool Server::handle_tls(ResponseBuilder &builder, sockaddr_in &client, unsigned 
         if(n == -1) std::cerr << "recv() failed: " << n << std::endl;
         builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
         isError = ((buffer[0] >> 6) & 3) != 0 || n < 20;
-    });*/
+    });
     return true;
 }
 
