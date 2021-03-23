@@ -162,6 +162,7 @@ bool Server::handle_tls(ResponseBuilder &builder, sockaddr_in &client,
         if(n == -1) std::cerr << "SSL read failed: " << n << std::endl;
         builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
         isError = ((buffer[0] >> 6) & 3) != 0 || n < 20;
+        ggg
     });
     return true;
 }
