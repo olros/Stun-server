@@ -143,8 +143,6 @@ bool Server::handle_tls(ResponseBuilder &builder, sockaddr_in &client,
     int client_socket_fd = accept(socket_fd, (struct sockaddr *) &client, &length);
     if (client_socket_fd == -1) return false;
     SSL *ssl;
-    std::cout << ssl << std::endl;
-    std::cout << "hei" << std::endl;
     event_loop->post_after([&ssl, &builder, &client_socket_fd, &isError, &is_SSL_error]{
         if(is_SSL_error)
             send(client_socket_fd, builder.buildErrorResponse(ERROR_CODE, "TLS connection could not be established.").getResponse(),
@@ -161,7 +159,7 @@ bool Server::handle_tls(ResponseBuilder &builder, sockaddr_in &client,
         SSL_set_fd(ssl, client_socket_fd);
         if(SSL_accept(ssl) <= 0) is_SSL_error = true;
         int n = SSL_read(ssl, buffer, BUFFER_SIZE);
-        if(n == -1) std::cerr << "recv() failed: " << n << std::endl;
+        if(n == -1) std::cerr << "SSL read failed: " << n << std::endl;
         builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
         isError = ((buffer[0] >> 6) & 3) != 0 || n < 20;
     });

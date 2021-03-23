@@ -47,3 +47,4 @@
 *.out
 *.app
 frontend/.eslintcache
+*.pem
