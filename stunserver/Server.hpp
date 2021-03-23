@@ -173,7 +173,6 @@ bool Server::init_tls() {
     SSL_load_error_strings();
     OpenSSL_add_ssl_algorithms();
 
-
     const SSL_METHOD *method;
 
     method = TLS_server_method();
