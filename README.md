@@ -1,5 +1,9 @@
 # IDATT2104-Project
-Created by: Hermann Owren Elton, Martin Slind Hagen and Olaf Rosendahl  
+Created by: Hermann Owren Elton, Martin Slind Hagen and Olaf Rosendahl
+
+## Introduction
+This was an optional assignment in the course IDATT2104 at NTNU.  
+The task was to create a STUN server and a P2P application. The P2P application will use the STUN server to get it's IP address so it can communicate with it's counter peer.  
 
 ## Server
 Insert server name and link to latest running of CI/CD.....
@@ -8,13 +12,11 @@ Action workflows for CI/CD:
   - https://github.com/olros/IDATT2104-Project/actions/workflows/master_vm_stun-app.yml
 - Deployment of frontend demoapplication to Firebase hosting:
   - https://github.com/olros/IDATT2104-Project/actions/workflows/deploy.yml
-- 
-## Introduction
-This was an optional assignment in the course IDATT2104 at NTNU.  
-The task was to create a STUN server and a P2P application. The P2P application will use the STUN server to get it's IP address so it can communicate with it's counter peer.  
+-
+## Implementation and functionality
 
 *Server*:  
- The stun server is implemented with UDP, TCP and TLS support and all off the different servers for the different protocols run in their own thread with an event-loop for request handling. The event loop contains a method called post_after which kind of works like async await i JavaScript. For each protocol run a connection is either established by receiving a message(UDP) or by accepting (TCP and TLS). When a connection is established it is passed on to the post_after method, so that the listening socket can keep on recieiving more requests. The post_after method has to parameters. The first is the function to await being posted to the event loop, and the second is the function that is to be completede before the first function is posted to the event loop. In the second function the buinsess logic is passed (handling of the data), and this is run in it's own thread. Meanwhile the first function is responisble for sending back the answer to the client. Handling the data in it's own thread means that we can compute the the IP-adress of the client more efficiently. By posting the first function to the event loop the need for locking the socket is not needed, since the event loop only consists of one thread. For TCP connections the listen() method is used, where a backlog equal to 5 is passed, meaning that the socket can have up to 5 waiting connections before incoming connections are turned down. Since UDP and TCP packages contain different header fields the listening socket for TCP and UDP can be run on the same port. To handle stun request and responses, the server has a request builder class that verifies stun requests, and creates STUN success and error responses.The builder verifies if the stun requests first to bits are 0, if it includes the magic cookie, and that its type is of a binding request. The server accepts UDP and TCP requests on port 3478 and TLS on port 5349. 
+ The stun server is implemented with UDP, TCP and TLS support and all off the different servers for the different protocols run in their own thread with an event-loop for request handling. The event loop contains a method called post_after which kind of works like async await i JavaScript. For each protocol run a connection is either established by receiving a message(UDP) or by accepting (TCP and TLS). When a connection is established it is passed on to the post_after method, so that the listening socket can keep on recieiving more requests. The post_after method has to parameters. The first is the function to await being posted to the event loop, and the second is the function that is to be completede before the first function is posted to the event loop. In the second function the buinsess logic is passed (handling of the data), and this is run in it's own thread. Meanwhile the first function is responisble for sending back the answer to the client. Handling the data in it's own thread means that we can compute the the IP-adress of the client more efficiently. By posting the first function to the event loop the need for locking the socket is not needed, since the event loop only consists of one thread. For TCP connections the listen() method is used, where a backlog equal to 5 is passed, meaning that the socket can have up to 5 waiting connections before incoming connections are turned down. Since UDP and TCP packages contain different header fields the listening socket for TCP and UDP can be run on the same port. To handle stun request and responses, the server has a request builder class that verifies stun requests, and creates STUN success and error responses.The builder verifies if the stun requests first to bits are 0, if it includes the magic cookie, and that its type is of a binding request. The server accepts UDP and TCP requests on port 3478 and TLS on port 5349. The STUN responses are created by using structs like they are a object of a class. The struct is set up to look like the STUN response we want to use, and then the different attributes are set, and returned back to the client. 
 
 *Frontend*:  
 The frontend application is written in React with Typescript. It uses the Firebase Firestore NoSQL-database to handle connection between clients. When users opens the site, they are presented a screen where they can type in their name and create a "Room". When they create a room, the app gets the user's WebRTC local description which is uploaded to a Firestore document with the roomId. In addition, the user's ICE-candidates (candidates for connection from another user to this user) is uploaded to a subcollection. When the room have been created, the user can share the url with the roomId to others who can open the website and then join the video-chat. On join they upload their own localdescription and ICE candidates to allow to room-creator to connect to the user who joined.
@@ -119,6 +121,8 @@ yarn start
 ## Link to eventual api
 - [libssl](https://cppget.org/libssl)
     - This is a library  that provids SSLv3 and TLS implementations for C and C++
+- [ReactJS](https://reactjs.org/docs/getting-started.html)
+    - A JavaScript library for building user interfaces
 
 ## Resources
 * [UDP server in C](https://www.geeksforgeeks.org/udp-server-client-implementation-c/)
