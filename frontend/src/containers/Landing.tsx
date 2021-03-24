@@ -140,7 +140,7 @@ const Landing = () => {
             onClick={() => setJoin(true)}
             startIcon={<Group />}
             variant={join ? 'contained' : 'outlined'}>
-            Bli med i rom
+            Bli med i et rom
           </Button>
         </div>
       </Paper>
@@ -181,6 +181,11 @@ const Landing = () => {
                 variant='contained'>
                 Åpne kamera og mikrofon
               </Button>
+              {!store.localStream.get && (
+                <Typography variant='subtitle2'>
+                  {`Du må gi oss tilgang til ditt kamera og mikrofon før du kan opprette et rom. Trykk på "Åpne kamera og mikrofon" og klikk på "Tillat"`}
+                </Typography>
+              )}
               <video autoPlay className={!store.localStream.get ? classes.hide : classes.video} muted playsInline ref={localVideo}></video>
               {store.localStream.get && (
                 <Button className={classes.button} color='primary' startIcon={<Add />} type='submit' variant='contained'>

@@ -26,7 +26,6 @@ export const openUserMedia = async (localVideo: React.RefObject<HTMLVideoElement
 
   const newMediaStream = new MediaStream();
   store.remoteStream.set(newMediaStream);
-  // remoteVideo.current.srcObject = newMediaStream;
 };
 
 export const setScreenUserMedia = async (localVideo: React.RefObject<HTMLVideoElement>, store: StoreType, showSnackbar: SnackbarProps) => {
@@ -59,9 +58,7 @@ export const setCameraUserMedia = async (
   video = store.shareVideo.get,
   audio = store.shareAudio.get,
 ) => {
-  store.localStream.get?.getTracks().forEach(function (track) {
-    track.stop();
-  });
+  store.localStream.get?.getTracks().forEach((track) => track.stop());
   const stream = await navigator.mediaDevices.getUserMedia({
     video: video,
     audio: audio,

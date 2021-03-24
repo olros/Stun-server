@@ -189,8 +189,8 @@ const Room = () => {
     <div className={classes.root}>
       {joined ? (
         <>
-          <video autoPlay className={store.remoteStream.get === null ? classes.hide : classes.remoteVideo} playsInline ref={remoteVideo}></video>
-          <video autoPlay className={store.localStream.get === null ? classes.hide : classes.localVideo} muted playsInline ref={localVideo}></video>
+          <video autoPlay className={!store.remoteStream.get?.active ? classes.hide : classes.remoteVideo} playsInline ref={remoteVideo}></video>
+          <video autoPlay className={!store.localStream.get?.active ? classes.hide : classes.localVideo} muted playsInline ref={localVideo}></video>
           <Typography className={classes.remoteName} variant='h6'>
             {store.remoteName.get}
           </Typography>
@@ -203,7 +203,7 @@ const Room = () => {
                 <CallEndRoundedIcon />
               </Fab>
             </Tooltip>
-            {store.remoteStream.get === null && (
+            {!store.remoteStream.get?.active && (
               <Tooltip aria-label='Del link' title='Del link'>
                 <Fab className={classes.fab} color='primary' onClick={() => share()}>
                   <ShareRoundedIcon />
@@ -248,6 +248,11 @@ const Room = () => {
                 variant='contained'>
                 Åpne kamera og mikrofon
               </Button>
+              {!store.localStream.get && (
+                <Typography variant='subtitle2'>
+                  {`Du må gi oss tilgang til ditt kamera og mikrofon før du kan opprette et rom. Trykk på "Åpne kamera og mikrofon" og klikk på "Tillat"`}
+                </Typography>
+              )}
               <video autoPlay className={!store.localStream.get ? classes.hide : classes.video} muted playsInline ref={previewVideo}></video>
               {store.localStream.get && (
                 <Button className={classes.button} color='primary' startIcon={<Group />} type='submit' variant='contained'>
