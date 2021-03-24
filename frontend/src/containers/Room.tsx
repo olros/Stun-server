@@ -203,11 +203,13 @@ const Room = () => {
                 <CallEndRoundedIcon />
               </Fab>
             </Tooltip>
-            <Tooltip aria-label='Del link' title='Del link'>
-              <Fab className={classes.fab} color='primary' onClick={() => share()}>
-                <ShareRoundedIcon />
-              </Fab>
-            </Tooltip>
+            {store.remoteStream.get === null && (
+              <Tooltip aria-label='Del link' title='Del link'>
+                <Fab className={classes.fab} color='primary' onClick={() => share()}>
+                  <ShareRoundedIcon />
+                </Fab>
+              </Tooltip>
+            )}
             {!store.sharingDisplay.get ? (
               <Tooltip aria-label='Del skjerm' title='Del skjerm'>
                 <Fab className={classes.fab} color='primary' onClick={() => setScreenUserMedia(localVideo, store, showSnackbar)}>
