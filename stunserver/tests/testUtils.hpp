@@ -5,11 +5,10 @@
 #include <stdlib.h> 
 #include <arpa/inet.h>
 
-STUNIncommingHeader* createStunRequest(){
-    STUNIncommingHeader* request = (STUNIncommingHeader *) malloc(sizeof(STUNIncommingHeader));
+STUNIncomingHeader* create_stun_request(){
+    STUNIncomingHeader* request = (STUNIncomingHeader *) malloc(sizeof(STUNIncomingHeader));
     for (int i = 0; i<COOKIE_LENGTH; i++){
         request->identifier[i] = cookie[i];
-
     }
     for (int i = COOKIE_LENGTH; i<identifier_size; i++){
         request->identifier[i] = rand() % 10;
@@ -27,16 +26,12 @@ sockaddr_in create_client(){
     return client;
 }
 
-in_addr_t createIp(){
+in_addr_t create_IP(){
     return htonl(rand());
 } 
 
-in_port_t createPort(){
+in_port_t create_port(){
     return htons(rand());
 }
-
-
-
-
 
 #endif

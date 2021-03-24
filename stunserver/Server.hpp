@@ -51,9 +51,9 @@ public:
 
     Server(int socket_port, SocketType sock_type);
 
-    bool startServer();
+    bool start_server();
 
-    void closeServer();
+    void close_server();
 
     ~Server();
 };
@@ -88,80 +88,78 @@ bool Server::init_listening_socket() {
 
 bool Server::handle_udp(ResponseBuilder &builder, sockaddr_in &client, socklen_t &length) {
     unsigned char buffer[BUFFER_SIZE];
-    bool isError = false;
+    bool is_error = false;
     int n = recvfrom(socket_fd, buffer, sizeof(buffer),
                      MSG_WAITALL, (struct sockaddr *) (&client), &length);
     if (n == -1) {
         std::cerr << "recvfrom() failed: " << strerror(n) << std::endl;
         return false;
     }
-    event_loop->post_after([&client, this, &buffer, &builder, &isError] {
-        if ( isError || builder.isError())
-            sendto(this->socket_fd, builder.buildErrorResponse(ERROR_CODE, "Something went wrong!?").getResponse(),
+    event_loop->post_after([&client, this, &buffer, &builder, &is_error] {
+        if ( is_error || builder.is_error())
+            sendto(this->socket_fd, builder.build_error_response(ERROR_CODE, "Something went wrong!?").get_response(),
                    sizeof(struct StunErrorResponse), MSG_CONFIRM,
                    (const struct sockaddr *) &client, sizeof(client));
 
         else
-            sendto(this->socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4),
+            sendto(this->socket_fd, builder.build_success_response().get_response(), sizeof(struct STUNResponseIPV4),
                    MSG_CONFIRM, (const struct sockaddr *) &client, sizeof(client));
-    }, [&builder, &buffer, &client, &isError, &n] {
-        builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
-        isError = ((buffer[0] >> 6) & 3) != 0 || n < 20;
+    }, [&builder, &buffer, &client, &is_error, &n] {
+        builder = ResponseBuilder(true, (STUNIncomingHeader *) buffer, client);
+        is_error = ((buffer[0] >> 6) & 3) != 0 || n < 20;
     });
     return true;
 }
 
 bool Server::handle_tcp(ResponseBuilder &builder, struct sockaddr_in &client, socklen_t &length) {
     unsigned char buffer[BUFFER_SIZE];
-    bool isError = false;
+    bool is_error = false;
     int client_socket_fd = accept(socket_fd, (struct sockaddr *) &client, &length);
     if (client_socket_fd == -1) return false;
-    event_loop->post_after([&builder, &client_socket_fd, &isError]{
-        if (isError || builder.isError())
-            send(client_socket_fd, builder.buildErrorResponse(ERROR_CODE, "Something went wrong!?").getResponse(),
+    event_loop->post_after([&builder, &client_socket_fd, &is_error]{
+        if (is_error || builder.is_error())
+            send(client_socket_fd, builder.build_error_response(ERROR_CODE, "Something went wrong!?").get_response(),
                    sizeof(struct StunErrorResponse), MSG_CONFIRM);
-
         else
-            send(client_socket_fd, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4),
+            send(client_socket_fd, builder.build_success_response().get_response(), sizeof(struct STUNResponseIPV4),
                    MSG_CONFIRM);
         close(client_socket_fd);
-    }, [&builder, &client_socket_fd, &buffer, &isError, client]{
+    }, [&builder, &client_socket_fd, &buffer, &is_error, client]{
         int n = recv(client_socket_fd, buffer, BUFFER_SIZE,0);
         if(n == -1) std::cerr << "recv() failed: " << n << std::endl;
-        builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
-        isError = ((buffer[0] >> 6) & 3) != 0 || n < 20;
+        builder = ResponseBuilder(true, (STUNIncomingHeader *) buffer, client);
+        is_error = ((buffer[0] >> 6) & 3) != 0 || n < 20;
     });
 
     return true;
 }
 
-bool Server::handle_tls(ResponseBuilder &builder, sockaddr_in &client,
-                        socklen_t &length) {
+bool Server::handle_tls(ResponseBuilder &builder, sockaddr_in &client, socklen_t &length) {
     unsigned char buffer[BUFFER_SIZE];
-    bool isError = false;
+    bool is_error = false;
     bool is_SSL_error = false;
     int client_socket_fd = accept(socket_fd, (struct sockaddr *) &client, &length);
     if (client_socket_fd == -1) return false;
     SSL *ssl;
-    event_loop->post_after([&ssl, &builder, &client_socket_fd, &isError, &is_SSL_error]{
+    event_loop->post_after([&ssl, &builder, &client_socket_fd, &is_error, &is_SSL_error]{
         if(is_SSL_error)
-            send(client_socket_fd, builder.buildErrorResponse(ERROR_CODE, "TLS connection could not be established.").getResponse(),
+            send(client_socket_fd, builder.build_error_response(ERROR_CODE, "TLS connection could not be established.").get_response(),
                  sizeof(struct StunErrorResponse), MSG_CONFIRM);
-        else if (isError || builder.isError())
-            SSL_write(ssl, builder.buildErrorResponse(400, "Something went wrong!?").getResponse(), sizeof(struct StunErrorResponse));
+        else if (is_error || builder.is_error())
+            SSL_write(ssl, builder.build_error_response(ERROR_CODE, "Something went wrong!?").get_response(), sizeof(struct StunErrorResponse));
         else
-            SSL_write(ssl, builder.buildSuccessResponse().getResponse(), sizeof(struct STUNResponseIPV4));
+            SSL_write(ssl, builder.build_success_response().get_response(), sizeof(struct STUNResponseIPV4));
         SSL_shutdown(ssl);
         SSL_free(ssl);
         close(client_socket_fd);
-    }, [this, &ssl, &builder, &client_socket_fd, &buffer, &isError, &is_SSL_error, client]{
+    }, [this, &ssl, &builder, &client_socket_fd, &buffer, &is_error, &is_SSL_error, client]{
         ssl = SSL_new(this->context);
         SSL_set_fd(ssl, client_socket_fd);
         if(SSL_accept(ssl) <= 0) is_SSL_error = true;
         int n = SSL_read(ssl, buffer, BUFFER_SIZE);
         if(n == -1) std::cerr << "SSL read failed: " << n << std::endl;
-        builder = ResponseBuilder(true, (STUNIncommingHeader *) buffer, client);
-        isError = ((buffer[0] >> 6) & 3) != 0 || n < 20;
+        builder = ResponseBuilder(true, (STUNIncomingHeader *) buffer, client);
+        is_error = ((buffer[0] >> 6) & 3) != 0 || n < 20;
     });
     return true;
 }
@@ -195,7 +193,7 @@ bool Server::init_tls() {
     }
 
     if(!SSL_CTX_check_private_key(context)){
-        std::cerr << "Certificate and private key do not match: " << error_code << std::endl;
+        std::cerr << "Certificate and private key do not match." << std::endl;
         return false;
     }
 
@@ -207,7 +205,7 @@ void Server::cleanup_tls() {
     EVP_cleanup();
 }
 
-bool Server::startServer() {
+bool Server::start_server() {
     event_loop->start();
     keep_going = true;
 
@@ -237,7 +235,7 @@ bool Server::startServer() {
     return true;
 }
 
-void Server::closeServer() {
+void Server::close_server() {
     event_loop->stop();
     event_loop->join();
     keep_going = false;
@@ -248,11 +246,3 @@ void Server::closeServer() {
 Server::~Server() {
     delete event_loop;
 }
-
-
-
-
-
-
-
-

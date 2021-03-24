@@ -7,7 +7,7 @@
 #define identifier_size 16
 #define IPv4_PROTOCOL_VALUE 0x01
 #define IPv6_PROTOCOL_VALUE 0x02
-#define XOR_MAPPED_ADDRESSS 0x0020
+#define XOR_MAPPED_ADDRESS 0x0020
 #define IS_BINDING_REQUEST(msg_type)(((msg_type) & 0x0110) == 0x00100)
 const int COOKIE_LENGTH = 4;
 const uint8_t STUN_COOKIE_B1 = 0x21;
@@ -16,7 +16,7 @@ const uint8_t STUN_COOKIE_B3 = 0xA4;
 const uint8_t STUN_COOKIE_B4 = 0x42;
 const uint16_t STUN_REQUEST_TYPE = 0x00100;
 const uint8_t cookie[COOKIE_LENGTH] = {STUN_COOKIE_B1, STUN_COOKIE_B2, STUN_COOKIE_B3, STUN_COOKIE_B4};
-struct STUNIncommingHeader{
+struct STUNIncomingHeader{
 
     uint16_t type;
     
@@ -33,9 +33,9 @@ struct STUNResponse{
     
     uint8_t identifier[identifier_size];
 
-    uint16_t atttype;
+    uint16_t att_type;
     
-    uint16_t attlength;
+    uint16_t att_length;
 
     uint8_t padding;
 
@@ -53,10 +53,9 @@ struct STUNResponseIPV4{
     
     uint8_t identifier[identifier_size];
 
-    uint16_t atttype;
-    
+    uint16_t att_type;
 
-    uint16_t attlength;
+    uint16_t att_length;
 
     uint8_t padding;
 
@@ -74,14 +73,13 @@ struct StunErrorResponse{
     
     uint8_t identifier[identifier_size];
 
-    uint16_t atttype;
+    uint16_t att_type;
 
-    uint16_t attlength;
-
+    uint16_t att_length;
 
     uint16_t zeros;
 
-    uint8_t clss;
+    uint8_t error_class;
 
     uint8_t nr;
 
