@@ -32,6 +32,14 @@ A future improvment would be to change the length of the STUN response and the X
 ### Add more attributes 
 This goes hand in hand with a more adaptive request building. The stun server currently does not handle a request with attributes, like username or password. So a improvment would be to check for different attributes and then adding them to the response being built.  
 
+## *frontend*:
+
+### Full Safari support
+The app is a bit buggy on safari.
+
+### Recover audio after sharing screen
+After sharing screen we lose the audio stream of the person sharing the screen. 
+
 ## Requirements
 *Server:*
 - g++10 or later
