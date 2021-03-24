@@ -131,7 +131,7 @@ yarn start
 ## Link to eventual api
 - [libssl](https://cppget.org/libssl)
     - This is a library  that provids SSLv3 and TLS implementations for C and C++
-- [ReactJS](https://reactjs.org/docs/getting-started.html)
+- [ReactJS](https://reactjs.org/docs/getting-started.html)(Framework)
     - A JavaScript library for building user interfaces
 
 ## Resources
