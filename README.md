@@ -67,7 +67,7 @@ After sharing screen we lose the audio stream of the person sharing the screen.
 - Node.js
   - Node.js is required to run the React demoapplication.
 - Firebase
-  - Firebase Firestore is used as a database to ease the client exhange of LocalDescription which is needed to communicate with WebRTC. Firestore is a simple NoSQL database with a simple SDK which is really quick to setup and get started.
+  - Firebase Firestore is used as a database to ease the client exchange of LocalDescription which is needed to communicate with WebRTC. Firestore is a simple NoSQL database with a simple SDK which is really quick to setup and get started.
 - Typescript
   - Typescript is used instead of Javascript to get typings which is really useful especially when creating large web-applications. Even though this application isn't that large, it's helpful to avoid errors and ease development with intellisense.
     
@@ -131,7 +131,7 @@ yarn start
 ## Link to eventual api
 - [libssl](https://cppget.org/libssl)
     - This is a library  that provids SSLv3 and TLS implementations for C and C++
-- [ReactJS](https://reactjs.org/docs/getting-started.html)
+- [ReactJS](https://reactjs.org/docs/getting-started.html)(Framework)
     - A JavaScript library for building user interfaces
 
 ## Resources
