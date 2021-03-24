@@ -61,7 +61,7 @@ After sharing screen we lose the audio stream of the person sharing the screen.
 - Docker-compose 
   - Docker-compose is used to easily build and run different Docker images
 - OpenSSL
-  - OpenSSL is used to create and run the TLS part of the sever it creates rsaKeys for TLS communication
+  - OpenSSL is used to create and run the TLS part of the server it creates rsaKeys for TLS communication
 
 *Frontend:*
 - Node.js
@@ -72,7 +72,9 @@ After sharing screen we lose the audio stream of the person sharing the screen.
   - Typescript is used instead of Javascript to get typings which is really useful especially when creating large web-applications. Even though this application isn't that large, it's helpful to avoid errors and ease development with intellisense.
     
 ## Installation instructions
-To run the sever adn tests you will need [Docker](https://docs.docker.com/engine/install/) and [Docker-compose](https://docs.docker.com/compose/install/). Optionally you can use [GNU Make](https://www.gnu.org/software/make/) to run commads to start the server. If you want to run with TLS you will also need [openSSL](https://www.openssl.org/source/)
+To run the sever and tests you will need [Docker](https://docs.docker.com/engine/install/) and [Docker-compose](https://docs.docker.com/compose/install/). Optionally you can use [GNU Make](https://www.gnu.org/software/make/) to run commads to start the server. If you want to run with TLS you will also need [openSSL](https://www.openssl.org/source/)
+
+To run the application you wil need [NodeJS](https://nodejs.org/en/) and [Yarn](https://classic.yarnpkg.com/en/docs/install/#debian-stable). 
 ## Starting the server
 
 To run the server
